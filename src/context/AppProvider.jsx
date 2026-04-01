@@ -112,7 +112,8 @@ export const AppProvider = ({ children }) => {
       setApgar1MinParams(scoreData);
     } else if (interval === 5) {
       setApgar5MinParams(scoreData);
-      // Auto queue the session for backup when 5min is finished!
+
+      // Always queue for backup to history when the 5-min is interacted with, even if just "In Progress"
       queueSession({
         recordedTimeZone,
         deliveryStartTime,
@@ -123,7 +124,6 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // Loads a historical session back into the main view so it can be edited
   const loadSessionForEdit = (session) => {
     setDeliveryStartTime(session.deliveryStartTime);
     setRecordedTimeZone(session.recordedTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone);

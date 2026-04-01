@@ -37,6 +37,24 @@ export const SummaryScreen = () => {
         return `${m}m ${s}s`;
     };
 
+    const getScoreTitle = (params) => {
+        if (params.skipped) return 'Skipped';
+        if (params.inProgress) return 'In Progress';
+        return `${params.total}/10`;
+    };
+
+    const getColorClass1 = (params) => {
+        if (params.skipped) return 'text-slate-400';
+        if (params.inProgress) return 'text-amber-500 dark:text-amber-400';
+        return 'text-violet-600 dark:text-violet-400';
+    };
+
+    const getColorClass5 = (params) => {
+        if (params.skipped) return 'text-slate-400';
+        if (params.inProgress) return 'text-amber-500 dark:text-amber-400';
+        return 'text-sky-600 dark:text-sky-400';
+    };
+
     const renderDetailedScores = (params) => {
         if (!params || params.skipped || !params.scores) return null;
         const s = params.scores;
@@ -44,23 +62,23 @@ export const SummaryScreen = () => {
             <div className="flex flex-col gap-2 mt-5 w-full text-sm text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-900/40 p-4 rounded-2xl border border-white/40 dark:border-slate-700/50 shadow-sm">
                 <div className="flex justify-between w-full border-b border-slate-200/60 dark:border-slate-700/60 pb-1.5">
                     <span className="text-slate-500 dark:text-slate-400">Color (Appearance):</span>
-                    <span className="font-black text-base">{s.appearance}</span>
+                    <span className="font-black text-base">{s.appearance ?? '-'}</span>
                 </div>
                 <div className="flex justify-between w-full border-b border-slate-200/60 dark:border-slate-700/60 pb-1.5">
                     <span className="text-slate-500 dark:text-slate-400">Pulse (Heart Rate):</span>
-                    <span className="font-black text-base">{s.pulse}</span>
+                    <span className="font-black text-base">{s.pulse ?? '-'}</span>
                 </div>
                 <div className="flex justify-between w-full border-b border-slate-200/60 dark:border-slate-700/60 pb-1.5">
                     <span className="text-slate-500 dark:text-slate-400">Grimace (Reflex):</span>
-                    <span className="font-black text-base">{s.grimace}</span>
+                    <span className="font-black text-base">{s.grimace ?? '-'}</span>
                 </div>
                 <div className="flex justify-between w-full border-b border-slate-200/60 dark:border-slate-700/60 pb-1.5">
                     <span className="text-slate-500 dark:text-slate-400">Tone (Activity):</span>
-                    <span className="font-black text-base">{s.activity}</span>
+                    <span className="font-black text-base">{s.activity ?? '-'}</span>
                 </div>
                 <div className="flex justify-between w-full pt-1.5">
                     <span className="text-slate-500 dark:text-slate-400">Breathing (Respiration):</span>
-                    <span className="font-black text-base">{s.respiration}</span>
+                    <span className="font-black text-base">{s.respiration ?? '-'}</span>
                 </div>
             </div>
         );
@@ -98,8 +116,8 @@ export const SummaryScreen = () => {
                             <span className="font-bold text-violet-800 dark:text-violet-300 uppercase tracking-wider text-xs mb-4 sm:mb-0">1-Min APGAR</span>
                             <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                                 <div className="text-left sm:text-right">
-                                    <div className="font-black text-5xl sm:text-6xl text-violet-600 dark:text-violet-400 mb-1 tracking-tight">
-                                        {apgar1MinParams.skipped ? 'Skipped' : `${apgar1MinParams.total}/10`}
+                                    <div className={`font-black text-5xl sm:text-6xl mb-1 tracking-tight ${getColorClass1(apgar1MinParams)}`}>
+                                        {getScoreTitle(apgar1MinParams)}
                                     </div>
                                     <div className="text-xs sm:text-sm text-violet-500/70 dark:text-violet-300/60 font-medium flex items-center justify-start sm:justify-end">
                                         Logged at: {formatTimestamp(apgar1MinParams.timeCompleted)} <TimeZoneBadge />
@@ -113,7 +131,6 @@ export const SummaryScreen = () => {
                                 </button>
                             </div>
                         </div>
-                        {/* Render detailed breakdown automatically */}
                         {renderDetailedScores(apgar1MinParams)}
                     </div>
                 )}
@@ -124,8 +141,8 @@ export const SummaryScreen = () => {
                             <span className="font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider text-xs mb-4 sm:mb-0">5-Min APGAR</span>
                             <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                                 <div className="text-left sm:text-right">
-                                    <div className="font-black text-5xl sm:text-6xl text-sky-600 dark:text-sky-400 mb-1 tracking-tight">
-                                        {apgar5MinParams.skipped ? 'Skipped' : `${apgar5MinParams.total}/10`}
+                                    <div className={`font-black text-5xl sm:text-6xl mb-1 tracking-tight ${getColorClass5(apgar5MinParams)}`}>
+                                        {getScoreTitle(apgar5MinParams)}
                                     </div>
                                     <div className="text-xs sm:text-sm text-sky-500/70 dark:text-sky-300/60 font-medium flex items-center justify-start sm:justify-end">
                                         Logged at: {formatTimestamp(apgar5MinParams.timeCompleted)} <TimeZoneBadge />
@@ -139,7 +156,6 @@ export const SummaryScreen = () => {
                                 </button>
                             </div>
                         </div>
-                        {/* Render detailed breakdown automatically */}
                         {renderDetailedScores(apgar5MinParams)}
                     </div>
                 )}
@@ -149,7 +165,7 @@ export const SummaryScreen = () => {
                 onClick={stopDelivery}
                 className="mt-8 w-full py-5 rounded-[2rem] bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 font-black text-xl flex justify-center items-center gap-2 transition-all active:scale-95 touch-manipulation border border-slate-200 dark:border-slate-600 shadow-sm"
             >
-                <RotateCcw size={24} /> Let's Go Again
+                <RotateCcw size={24} /> Clear Timer
             </button>
         </div>
     );

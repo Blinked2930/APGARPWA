@@ -15,8 +15,11 @@ export function useOfflineSync() {
       const queue = JSON.parse(queueStr);
       const remainingQueue = [];
 
-      for (const session of queue) {
+      for (let session of queue) {
         try {
+          // Sanitize nulls that might trip up strict database rules
+          if (session.recordedTimeZone === null) delete session.recordedTimeZone;
+
           await saveSessionToCloud(session);
         } catch (error) {
           console.error("Failed to sync session, keeping in queue", error);
@@ -35,23 +38,24 @@ export function useOfflineSync() {
   }, [saveSessionToCloud]);
 
   useEffect(() => {
-    // Initial sync
     syncQueue();
-
-    // Listen to online events to trigger background sync
     window.addEventListener('online', syncQueue);
-    return () => {
-      window.removeEventListener('online', syncQueue);
-    };
+    return () => window.removeEventListener('online', syncQueue);
   }, [syncQueue]);
 
   const queueSession = useCallback((sessionData) => {
     const queueStr = localStorage.getItem('offlineQueue');
     const queue = queueStr ? JSON.parse(queueStr) : [];
-    queue.push(sessionData);
+
+    // CRITICAL FIX: If this session is already in the queue, update it instead of pushing a duplicate
+    const existingIndex = queue.findIndex(s => s.deliveryStartTime === sessionData.deliveryStartTime);
+    if (existingIndex >= 0) {
+      queue[existingIndex] = sessionData;
+    } else {
+      queue.push(sessionData);
+    }
+
     localStorage.setItem('offlineQueue', JSON.stringify(queue));
-    
-    // Attempt sync immediately if possible
     syncQueue();
   }, [syncQueue]);
 
