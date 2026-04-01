@@ -3,7 +3,7 @@ import { useAppContext } from '../context/AppProvider';
 import { ApgarModal } from './ApgarModal';
 
 export const ApgarOrchestrator = () => {
-    const { bodyOutTimes, apgar1MinParams, apgar5MinParams, playChime } = useAppContext();
+    const { bodyOutTimes, apgar1MinParams, apgar5MinParams, playChime, manualModal, closeManualModal } = useAppContext();
     const [currentModal, setCurrentModal] = useState(null); // 1 or 5
 
     useEffect(() => {
@@ -55,6 +55,10 @@ export const ApgarOrchestrator = () => {
             }
         }
     }, [currentModal, bodyOutTimes, apgar1MinParams, apgar5MinParams]);
+
+    if (manualModal) {
+        return <ApgarModal interval={manualModal} onClose={closeManualModal} />;
+    }
 
     if (!currentModal) return null;
 

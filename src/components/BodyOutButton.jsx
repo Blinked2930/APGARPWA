@@ -20,8 +20,8 @@ export const BodyOutButton = () => {
         disabled={isRecorded}
         className={`w-full h-full relative overflow-hidden group py-4 rounded-[2.5rem] shadow-xl transition-all touch-manipulation flex flex-col items-center justify-center border border-white/20
           ${isRecorded 
-            ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-400 dark:text-rose-500 shadow-none cursor-default border-none' 
-            : 'bg-gradient-to-br from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white shadow-pink-500/30 active:scale-95'
+            ? 'bg-slate-200/50 dark:bg-slate-800/40 text-emerald-600 dark:text-emerald-400 shadow-none cursor-default border-none backdrop-blur-md' 
+            : 'bg-gradient-to-br from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-emerald-500/30 active:scale-95'
           }
         `}
       >

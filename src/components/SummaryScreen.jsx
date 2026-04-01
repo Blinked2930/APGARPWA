@@ -1,9 +1,9 @@
 import React from 'react';
 import { useAppContext } from '../context/AppProvider';
-import { FileText } from 'lucide-react';
+import { FileText, RotateCcw, Edit2 } from 'lucide-react';
 
 export const SummaryScreen = () => {
-    const { deliveryStartTime, bodyOutTimes, apgar1MinParams, apgar5MinParams } = useAppContext();
+    const { deliveryStartTime, bodyOutTimes, apgar1MinParams, apgar5MinParams, stopDelivery, openApgarModal } = useAppContext();
 
     if (!deliveryStartTime) return null;
 
@@ -46,26 +46,52 @@ export const SummaryScreen = () => {
                 ))}
 
                 {apgar1MinParams && (
-                    <div className="flex flex-col sm:flex-row justify-between bg-violet-50 dark:bg-violet-900/10 p-5 rounded-2xl items-start sm:items-center">
+                    <div className="flex flex-col sm:flex-row justify-between bg-violet-50 dark:bg-violet-900/10 p-5 rounded-2xl items-start sm:items-center relative">
                         <span className="font-bold text-violet-800 dark:text-violet-300 uppercase tracking-wider text-xs mb-4 sm:mb-0">1-Min APGAR</span>
-                        <div className="text-left sm:text-right">
-                            <div className="font-black text-3xl text-violet-600 dark:text-violet-400 mb-1">Score: {apgar1MinParams.total}/10</div>
-                            <div className="text-sm text-violet-500/70 dark:text-violet-300/60 font-medium">Logged at: {formatTimestamp(apgar1MinParams.timeCompleted)}</div>
+                        <div className="text-left sm:text-right flex items-center gap-4">
+                            <div>
+                                <div className="font-black text-3xl text-violet-600 dark:text-violet-400 mb-1">
+                                    {apgar1MinParams.skipped ? 'Skipped' : `Score: ${apgar1MinParams.total}/10`}
+                                </div>
+                                <div className="text-sm text-violet-500/70 dark:text-violet-300/60 font-medium">Logged at: {formatTimestamp(apgar1MinParams.timeCompleted)}</div>
+                            </div>
+                            <button 
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); openApgarModal(1); }}
+                                className="p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                            >
+                                <Edit2 size={18} />
+                            </button>
                         </div>
                     </div>
                 )}
 
                 {apgar5MinParams && (
-                    <div className="flex flex-col sm:flex-row justify-between bg-sky-50 dark:bg-sky-900/10 p-5 rounded-2xl items-start sm:items-center">
+                    <div className="flex flex-col sm:flex-row justify-between bg-sky-50 dark:bg-sky-900/10 p-5 rounded-2xl items-start sm:items-center relative">
                         <span className="font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider text-xs mb-4 sm:mb-0">5-Min APGAR</span>
-                        <div className="text-left sm:text-right">
-                            <div className="font-black text-3xl text-sky-600 dark:text-sky-400 mb-1">Score: {apgar5MinParams.total}/10</div>
-                            <div className="text-sm text-sky-500/70 dark:text-sky-300/60 font-medium">Logged at: {formatTimestamp(apgar5MinParams.timeCompleted)}</div>
+                        <div className="text-left sm:text-right flex items-center gap-4">
+                            <div>
+                                <div className="font-black text-3xl text-sky-600 dark:text-sky-400 mb-1">
+                                    {apgar5MinParams.skipped ? 'Skipped' : `Score: ${apgar5MinParams.total}/10`}
+                                </div>
+                                <div className="text-sm text-sky-500/70 dark:text-sky-300/60 font-medium">Logged at: {formatTimestamp(apgar5MinParams.timeCompleted)}</div>
+                            </div>
+                            <button 
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); openApgarModal(5); }}
+                                className="p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
+                            >
+                                <Edit2 size={18} />
+                            </button>
                         </div>
                     </div>
                 )}
             </div>
 
+            <button
+                onClick={stopDelivery}
+                className="mt-8 w-full py-5 rounded-[2rem] bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 font-black text-xl flex justify-center items-center gap-2 transition-all active:scale-95 touch-manipulation border border-slate-200 dark:border-slate-600 shadow-sm"
+            >
+                <RotateCcw size={24} /> Let's Go Again
+            </button>
         </div>
     );
 };

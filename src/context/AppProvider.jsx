@@ -30,6 +30,8 @@ export const AppProvider = ({ children }) => {
     return localStorage.getItem('audioMode') || 'VOICE'; // Default to VOICE
   });
 
+  const [manualModal, setManualModal] = useState(null);
+
   const { playChime, speakTime } = useAudio();
   const { requestWakeLock, releaseWakeLock } = useWakeLock();
   const { queueSession } = useOfflineSync();
@@ -105,6 +107,9 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const openApgarModal = (interval) => setManualModal(interval);
+  const closeManualModal = () => setManualModal(null);
+
   return (
     <AppContext.Provider value={{
       deliveryStartTime,
@@ -118,7 +123,10 @@ export const AppProvider = ({ children }) => {
       saveApgarScore,
       toggleAudioMode,
       playChime,
-      speakTime
+      speakTime,
+      manualModal,
+      openApgarModal,
+      closeManualModal
     }}>
       {children}
     </AppContext.Provider>

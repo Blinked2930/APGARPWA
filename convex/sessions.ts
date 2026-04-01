@@ -45,3 +45,13 @@ export const saveSession = mutation({
     return await ctx.db.insert("sessions", args);
   },
 });
+
+export const deleteAllSessions = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const sessions = await ctx.db.query("sessions").collect();
+    for (const session of sessions) {
+      await ctx.db.delete(session._id);
+    }
+  },
+});

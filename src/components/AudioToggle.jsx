@@ -5,31 +5,34 @@ import { Volume2, VolumeX, Bell } from 'lucide-react';
 export const AudioToggle = () => {
   const { audioMode, toggleAudioMode } = useAppContext();
 
-  const getIcon = () => {
-    if (audioMode === 'VOICE') return <Volume2 size={32} className="text-violet-500" strokeWidth={2.5}/>;
-    if (audioMode === 'CHIME') return <Bell size={32} className="text-amber-500" strokeWidth={2.5}/>;
-    return <VolumeX size={32} className="text-slate-400" strokeWidth={2.5}/>;
+  const getConfig = () => {
+    if (audioMode === 'VOICE') return {
+      icon: <Volume2 size={32} strokeWidth={2.5}/>,
+      label: 'Voice',
+      classes: 'bg-indigo-600/90 hover:bg-indigo-600 shadow-indigo-500/20 backdrop-blur-md'
+    };
+    if (audioMode === 'CHIME') return {
+      icon: <Bell size={32} strokeWidth={2.5}/>,
+      label: 'Chime',
+      classes: 'bg-cyan-600/90 hover:bg-cyan-600 shadow-cyan-500/20 backdrop-blur-md'
+    };
+    return {
+      icon: <VolumeX size={32} strokeWidth={2.5}/>,
+      label: 'Muted',
+      classes: 'bg-slate-600/90 hover:bg-slate-600 shadow-slate-500/20 backdrop-blur-md'
+    };
   };
 
-  const getLabel = () => {
-    if (audioMode === 'VOICE') return 'Voice';
-    if (audioMode === 'CHIME') return 'Chime';
-    return 'Muted';
-  };
-
-  const getBgClass = () => {
-    if (audioMode === 'VOICE') return 'bg-violet-50 dark:bg-violet-900/20 border-violet-100 dark:border-violet-800/50';
-    if (audioMode === 'CHIME') return 'bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-800/50';
-    return 'bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700';
-  };
+  const config = getConfig();
 
   return (
     <button 
       onClick={toggleAudioMode}
-      className={`flex flex-col items-center justify-center p-3 sm:p-4 rounded-[2rem] shadow-md border-2 active:scale-95 transition-all outline-none h-full w-full ${getBgClass()}`}
+      className={`relative overflow-hidden group flex flex-col items-center justify-center p-3 sm:p-4 rounded-[2.5rem] shadow-xl text-white active:scale-95 transition-all touch-manipulation border border-white/20 outline-none h-full w-full ${config.classes}`}
     >
-      <div className="mb-2 bg-white dark:bg-slate-800 p-2 sm:p-3 rounded-2xl shadow-sm">{getIcon()}</div>
-      <span className="text-xs sm:text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider">{getLabel()}</span>
+      <div className="absolute inset-0 bg-white/20 opacity-0 group-active:opacity-100 transition-opacity"></div>
+      <div className="mb-1 drop-shadow-md">{config.icon}</div>
+      <span className="text-sm font-black tracking-wider drop-shadow-sm uppercase">{config.label}</span>
     </button>
   );
 };

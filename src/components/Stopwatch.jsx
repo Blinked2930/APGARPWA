@@ -55,18 +55,24 @@ export const Stopwatch = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-2 w-full">
-      <div className="text-[6.5rem] sm:text-[9rem] font-black tracking-tighter mb-1 leading-none text-slate-800 dark:text-white drop-shadow-sm">
+    <div className="flex flex-col items-center justify-center py-2 w-full relative">
+      <div className="text-[6.5rem] sm:text-[9rem] font-black tracking-tighter mb-1 leading-none text-slate-800 dark:text-white drop-shadow-sm font-mono origin-center">
         {formatTime(elapsed)}
       </div>
-      <div className="text-slate-400 font-bold uppercase tracking-widest text-sm mb-6">Total Delivery Time</div>
+      <div className="text-slate-400 font-bold uppercase tracking-widest text-sm mb-6 flex items-center gap-2">
+        <span className="w-8 h-px bg-slate-200 dark:bg-slate-700"></span>
+        Total Delivery Time
+        <span className="w-8 h-px bg-slate-200 dark:bg-slate-700"></span>
+      </div>
+      
       {!deliveryStartTime && (
         <button
           onClick={startDelivery}
-          className="flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white text-2xl font-black py-6 px-12 w-full max-w-sm rounded-[2.5rem] shadow-xl shadow-emerald-500/20 transition-all active:scale-95 touch-manipulation border border-white/20 mb-6"
+          className="relative overflow-hidden group flex items-center justify-center gap-3 bg-gradient-to-br from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-2xl font-black py-6 px-12 w-full max-w-sm rounded-[2.5rem] shadow-xl shadow-indigo-500/30 transition-all active:scale-95 touch-manipulation border border-indigo-400/20 mb-6"
         >
-          <Play fill="currentColor" size={28} />
-          HEAD OUT
+          <div className="absolute inset-0 bg-white/20 opacity-0 group-active:opacity-100 transition-opacity"></div>
+          <Play fill="currentColor" size={28} className="drop-shadow-sm" />
+          <span className="drop-shadow-sm tracking-wide">HEAD OUT</span>
         </button>
       )}
     </div>
