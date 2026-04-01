@@ -84,7 +84,10 @@ export const AppProvider = ({ children }) => {
 
   const markBodyOut = () => {
     setDeliveryStartTime(prev => prev ? prev : Date.now());
-    setBodyOutTimes(prev => [...prev, Date.now()]);
+    setBodyOutTimes(prev => {
+      if (prev.length === 0) return [Date.now()];
+      return prev;
+    });
   };
 
   const saveApgarScore = (interval, scoreData) => {

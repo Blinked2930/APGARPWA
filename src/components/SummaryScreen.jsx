@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAppContext } from '../context/AppProvider';
-import { FileText, RefreshCcw, AlertTriangle } from 'lucide-react';
+import { FileText } from 'lucide-react';
 
 export const SummaryScreen = () => {
-    const { deliveryStartTime, bodyOutTimes, apgar1MinParams, apgar5MinParams, stopDelivery } = useAppContext();
-    const [showConfirm, setShowConfirm] = useState(false);
+    const { deliveryStartTime, bodyOutTimes, apgar1MinParams, apgar5MinParams } = useAppContext();
 
     if (!deliveryStartTime) return null;
 
@@ -67,32 +66,6 @@ export const SummaryScreen = () => {
                 )}
             </div>
 
-            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700 font-semibold relative">
-                {!showConfirm ? (
-                    <button
-                        onClick={() => setShowConfirm(true)}
-                        className="w-full py-5 text-lg text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 transition-all flex items-center justify-center gap-2 active:scale-95 touch-manipulation font-bold"
-                    >
-                        <RefreshCcw size={20} />
-                        RESET EXACT TIMERS
-                    </button>
-                ) : (
-                    <div className="bg-rose-50 dark:bg-rose-900/20 rounded-2xl p-4 border border-rose-200 dark:border-rose-800/50">
-                        <p className="text-rose-600 dark:text-rose-400 font-bold text-center mb-4 flex items-center justify-center gap-2">
-                            <AlertTriangle size={20} />
-                            Are you sure? This cannot be undone.
-                        </p>
-                        <div className="flex gap-3">
-                            <button onClick={() => setShowConfirm(false)} className="flex-1 py-3 text-slate-500 bg-white dark:bg-slate-800 rounded-xl font-bold active:scale-95 touch-manipulation">
-                                Cancel
-                            </button>
-                            <button onClick={stopDelivery} className="flex-1 py-3 text-white bg-rose-500 hover:bg-rose-600 rounded-xl font-bold active:scale-95 touch-manipulation shadow-md shadow-rose-500/20">
-                                Yes, Reset All
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
         </div>
     );
 };
