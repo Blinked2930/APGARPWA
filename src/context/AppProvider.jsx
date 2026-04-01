@@ -123,6 +123,15 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Loads a historical session back into the main view so it can be edited
+  const loadSessionForEdit = (session) => {
+    setDeliveryStartTime(session.deliveryStartTime);
+    setRecordedTimeZone(session.recordedTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone);
+    setBodyOutTimes(session.bodyOutTimes || []);
+    setApgar1MinParams(session.apgar1MinParams || null);
+    setApgar5MinParams(session.apgar5MinParams || null);
+  };
+
   const openApgarModal = (interval) => setManualModal(interval);
   const closeManualModal = () => setManualModal(null);
 
@@ -143,7 +152,8 @@ export const AppProvider = ({ children }) => {
       speakTime,
       manualModal,
       openApgarModal,
-      closeManualModal
+      closeManualModal,
+      loadSessionForEdit
     }}>
       {children}
     </AppContext.Provider>

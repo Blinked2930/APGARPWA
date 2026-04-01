@@ -2,11 +2,17 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { format } from "date-fns";
-import { CalendarDays, CloudOff, Cloud, CheckCircle2, Trash2, AlertTriangle } from "lucide-react";
+import { CalendarDays, CloudOff, Cloud, CheckCircle2, Trash2, AlertTriangle, Edit2 } from "lucide-react";
+import { useAppContext } from '../context/AppProvider';
 
 export const HistoryTab = () => {
+  const { loadSessionForEdit } = useAppContext();
   const cloudSessions = useQuery(api.sessions.getSessions) || [];
   const deleteAllSessions = useMutation(api.sessions.deleteAllSessions);
+
+  // Note: Ensure `deleteSession` is defined in your `convex/sessions.ts` backend schema!
+  const deleteSingleSession = api.sessions.deleteSession ? useMutation(api.sessions.deleteSession) : null;
+
   const [showConfirm, setShowConfirm] = useState(false);
 
   // Also get the offline queue from localStorage
@@ -15,15 +21,11 @@ export const HistoryTab = () => {
   const [localQueue, setLocalQueue] = useState(offlineSessions);
 
   const handleDeleteAll = async () => {
-    // Delete offline
     localStorage.removeItem('offlineQueue');
     setLocalQueue([]);
-
-    // Delete cloud
     if (cloudSessions.length > 0) {
       await deleteAllSessions();
     }
-
     setShowConfirm(false);
   };
 
@@ -49,16 +51,16 @@ export const HistoryTab = () => {
   const formatTimeWithTz = (ts, tz) => {
     if (!ts) return '';
     try {
-      const options = { hour: 'numeric', minute: '2-digit' };
+      // Changed to show seconds
+      const options = { hour: 'numeric', minute: '2-digit', second: '2-digit' };
       if (tz) options.timeZone = tz;
       return new Date(ts).toLocaleTimeString('en-us', options);
     } catch (e) {
-      return format(new Date(ts), "h:mm a");
+      return format(new Date(ts), "h:mm:ss a");
     }
   };
 
-  const SessionCard = ({ session, isOffline }) => {
-    // Split the expanded state so 1-min and 5-min open independently
+  const SessionCard = ({ session, isOffline, index }) => {
     const [expanded1, setExpanded1] = useState(false);
     const [expanded5, setExpanded5] = useState(false);
 
@@ -66,13 +68,33 @@ export const HistoryTab = () => {
     const dateFormatted = format(dateObj, "MMM do, yyyy");
     const tz = session.recordedTimeZone;
 
-    // Head Out specific tracking
     const headOutTime = formatTimeWithTz(session.deliveryStartTime, tz);
-
-    // Body Out tracking
     const bodyOutMs = session.bodyOutTimes && session.bodyOutTimes.length > 0 ? session.bodyOutTimes[0] : null;
     const bodyOutTime = bodyOutMs ? formatTimeWithTz(bodyOutMs, tz) : null;
     const headToBodyDuration = bodyOutMs ? formatDuration(session.deliveryStartTime, bodyOutMs) : null;
+
+    const handleEdit = () => {
+      loadSessionForEdit(session);
+      alert("Session loaded! Please switch to the 'Active' clock tab at the bottom to edit the scores.");
+    };
+
+    const handleDelete = async () => {
+      const confirmed = window.confirm("Are you sure you want to delete this specific birth record? This cannot be undone.");
+      if (!confirmed) return;
+
+      if (isOffline) {
+        const newQueue = [...localQueue];
+        newQueue.splice(index, 1);
+        localStorage.setItem('offlineQueue', JSON.stringify(newQueue));
+        setLocalQueue(newQueue);
+      } else {
+        if (deleteSingleSession && session._id) {
+          await deleteSingleSession({ id: session._id });
+        } else {
+          alert("Could not delete cloud session. Ensure api.sessions.deleteSession exists in Convex.");
+        }
+      }
+    };
 
     const renderScores = (params) => {
       if (!params || params.skipped || !params.scores) return null;
@@ -89,15 +111,24 @@ export const HistoryTab = () => {
     };
 
     return (
-      <div className={`p-5 rounded-3xl shadow-sm border-2 ${isOffline ? 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800' : 'bg-white border-slate-100 dark:bg-slate-800 dark:border-slate-700'} mb-4 relative overflow-hidden`}>
+      <div className={`p-5 rounded-3xl shadow-sm border-2 ${isOffline ? 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800' : 'bg-white border-slate-100 dark:bg-slate-800 dark:border-slate-700'} mb-4 relative overflow-hidden group`}>
         {isOffline && (
           <div className="absolute top-0 right-0 bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 text-[10px] font-bold px-3 py-1 rounded-bl-xl flex items-center gap-1 uppercase tracking-wider">
             <CloudOff size={12} /> Pending Sync
           </div>
         )}
 
+        <div className="absolute top-4 right-4 flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+          <button onClick={handleEdit} className="p-2 bg-slate-100 hover:bg-indigo-100 text-slate-400 hover:text-indigo-600 dark:bg-slate-700 dark:hover:bg-indigo-900/50 rounded-lg transition-colors" title="Edit Session">
+            <Edit2 size={16} />
+          </button>
+          <button onClick={handleDelete} className="p-2 bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 dark:bg-slate-700 dark:hover:bg-rose-900/50 rounded-lg transition-colors" title="Delete Session">
+            <Trash2 size={16} />
+          </button>
+        </div>
+
         <div className="flex flex-col sm:flex-row justify-between items-start mb-4 mt-2 gap-4">
-          <div>
+          <div className="pt-8 sm:pt-0">
             <div className="font-black text-xl text-slate-800 dark:text-slate-100">{dateFormatted}</div>
 
             <div className="flex flex-col gap-1 mt-2">
@@ -121,7 +152,7 @@ export const HistoryTab = () => {
             </div>
           </div>
 
-          <div className="text-left sm:text-right bg-slate-50 dark:bg-slate-900/30 p-3 rounded-2xl w-full sm:w-auto">
+          <div className="text-left sm:text-right bg-slate-50 dark:bg-slate-900/30 p-3 rounded-2xl w-full sm:w-auto mt-4 sm:mt-0">
             <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Delivery</div>
             <div className="font-black text-emerald-600 dark:text-emerald-400 text-lg">
               {formatDuration(session.deliveryStartTime, session.apgar5MinParams?.timeCompleted)}
@@ -133,7 +164,6 @@ export const HistoryTab = () => {
           <div
             className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 flex flex-col justify-start items-center h-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
             onClick={() => setExpanded1(!expanded1)}
-            title="Click to toggle 1-Min APGAR details"
           >
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">1-Min Score</span>
             <span className="text-3xl font-black text-violet-600 dark:text-violet-400">
@@ -146,7 +176,6 @@ export const HistoryTab = () => {
           <div
             className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 flex flex-col justify-start items-center h-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
             onClick={() => setExpanded5(!expanded5)}
-            title="Click to toggle 5-Min APGAR details"
           >
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">5-Min Score</span>
             <span className="text-3xl font-black text-sky-600 dark:text-sky-400">
@@ -185,8 +214,6 @@ export const HistoryTab = () => {
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm">
           <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-
             <div className="flex flex-col items-center text-center gap-4 relative z-10">
               <div className="bg-rose-100 dark:bg-rose-900/30 p-4 rounded-full text-rose-500 dark:text-rose-400 mb-2">
                 <AlertTriangle size={40} strokeWidth={2.5} />
@@ -217,7 +244,7 @@ export const HistoryTab = () => {
 
       {localQueue.length > 0 && (
         <div className="mb-6">
-          {localQueue.map((s, i) => <SessionCard key={`off-${i}`} session={s} isOffline={true} />)}
+          {localQueue.map((s, i) => <SessionCard key={`off-${i}`} session={s} isOffline={true} index={i} />)}
         </div>
       )}
 
@@ -228,7 +255,7 @@ export const HistoryTab = () => {
         </div>
       ) : (
         <div>
-          {cloudSessions.map((s, i) => <SessionCard key={s._id || i} session={s} isOffline={false} />)}
+          {cloudSessions.map((s, i) => <SessionCard key={s._id || i} session={s} isOffline={false} index={i} />)}
         </div>
       )}
     </div>
