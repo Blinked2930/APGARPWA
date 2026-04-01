@@ -16,7 +16,7 @@ const MainTimerView = () => {
   const isBirthFinished = !!apgar5MinParams;
 
   return (
-    <div className="w-full max-w-2xl flex flex-col items-center gap-6">
+    <div className="w-full max-w-2xl flex flex-col items-center gap-6 pb-24 px-4 sm:px-6">
       
       <Stopwatch />
       
@@ -45,7 +45,7 @@ const AppContent = () => {
   const [activeTab, setActiveTab] = useState('timer'); // 'timer' or 'history'
 
   return (
-    <div className="min-h-screen text-slate-900 dark:text-slate-100 font-sans flex flex-col items-center selection:bg-transparent transition-colors overflow-x-hidden pt-4 sm:pt-6 bg-rose-50 dark:bg-slate-900">
+    <div className="min-h-screen text-slate-900 dark:text-slate-100 font-sans flex flex-col items-center selection:bg-transparent transition-colors pt-4 sm:pt-6 bg-rose-50 dark:bg-slate-900 overflow-y-auto pb-[100px]">
       
       {activeTab === 'timer' ? <MainTimerView /> : <HistoryTab />}
 
