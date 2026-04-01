@@ -18,12 +18,12 @@ export const HistoryTab = () => {
     // Delete offline
     localStorage.removeItem('offlineQueue');
     setLocalQueue([]);
-    
+
     // Delete cloud
     if (cloudSessions.length > 0) {
       await deleteAllSessions();
     }
-    
+
     setShowConfirm(false);
   };
 
@@ -52,13 +52,16 @@ export const HistoryTab = () => {
       const options = { hour: 'numeric', minute: '2-digit' };
       if (tz) options.timeZone = tz;
       return new Date(ts).toLocaleTimeString('en-us', options);
-    } catch(e) {
+    } catch (e) {
       return format(new Date(ts), "h:mm a");
     }
   };
 
   const SessionCard = ({ session, isOffline }) => {
-    const [expanded, setExpanded] = useState(false);
+    // Split the expanded state so 1-min and 5-min open independently
+    const [expanded1, setExpanded1] = useState(false);
+    const [expanded5, setExpanded5] = useState(false);
+
     const dateObj = new Date(session.deliveryStartTime);
     const dateFormatted = format(dateObj, "MMM do, yyyy");
     const tz = session.recordedTimeZone;
@@ -75,12 +78,12 @@ export const HistoryTab = () => {
       if (!params || params.skipped || !params.scores) return null;
       const s = params.scores;
       return (
-        <div className="flex flex-col gap-0.5 mt-2 w-full text-[10px] text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-slate-800/50 p-2 rounded-xl">
-          <div className="flex justify-between w-full"><span>Color:</span><span className="font-bold">{s.appearance}</span></div>
-          <div className="flex justify-between w-full"><span>Pulse:</span><span className="font-bold">{s.pulse}</span></div>
-          <div className="flex justify-between w-full"><span>Grimace:</span><span className="font-bold">{s.grimace}</span></div>
-          <div className="flex justify-between w-full"><span>Tone:</span><span className="font-bold">{s.activity}</span></div>
-          <div className="flex justify-between w-full"><span>Breathing:</span><span className="font-bold">{s.respiration}</span></div>
+        <div className="flex flex-col gap-0.5 mt-3 w-full text-[11px] text-slate-600 dark:text-slate-300 bg-white/60 dark:bg-slate-800/80 p-3 rounded-xl shadow-inner border border-slate-100 dark:border-slate-700">
+          <div className="flex justify-between w-full border-b border-slate-100 dark:border-slate-700/50 pb-0.5"><span>Color:</span><span className="font-black">{s.appearance}</span></div>
+          <div className="flex justify-between w-full border-b border-slate-100 dark:border-slate-700/50 pb-0.5"><span>Pulse:</span><span className="font-black">{s.pulse}</span></div>
+          <div className="flex justify-between w-full border-b border-slate-100 dark:border-slate-700/50 pb-0.5"><span>Grimace:</span><span className="font-black">{s.grimace}</span></div>
+          <div className="flex justify-between w-full border-b border-slate-100 dark:border-slate-700/50 pb-0.5"><span>Tone:</span><span className="font-black">{s.activity}</span></div>
+          <div className="flex justify-between w-full pt-0.5"><span>Breathing:</span><span className="font-black">{s.respiration}</span></div>
         </div>
       );
     };
@@ -126,24 +129,31 @@ export const HistoryTab = () => {
           </div>
         </div>
 
-        <div 
-          className="grid grid-cols-2 gap-3 cursor-pointer" 
-          onClick={() => setExpanded(!expanded)}
-          title="Click to toggle full APGAR scores"
-        >
-          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-3 flex flex-col justify-start items-center h-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div
+            className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 flex flex-col justify-start items-center h-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+            onClick={() => setExpanded1(!expanded1)}
+            title="Click to toggle 1-Min APGAR details"
+          >
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">1-Min Score</span>
-            <span className="text-2xl font-black text-violet-600 dark:text-violet-400">
+            <span className="text-3xl font-black text-violet-600 dark:text-violet-400">
               {session.apgar1MinParams?.skipped ? 'Skipped' : `${session.apgar1MinParams?.total ?? '?'}/10`}
             </span>
-            {expanded && renderScores(session.apgar1MinParams)}
+            {!expanded1 && <span className="text-[9px] text-slate-400 mt-2 uppercase tracking-widest bg-slate-200/50 dark:bg-slate-800 px-2 py-1 rounded-full">Tap for details</span>}
+            {expanded1 && renderScores(session.apgar1MinParams)}
           </div>
-          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-3 flex flex-col justify-start items-center h-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+
+          <div
+            className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 flex flex-col justify-start items-center h-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+            onClick={() => setExpanded5(!expanded5)}
+            title="Click to toggle 5-Min APGAR details"
+          >
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">5-Min Score</span>
-            <span className="text-2xl font-black text-sky-600 dark:text-sky-400">
+            <span className="text-3xl font-black text-sky-600 dark:text-sky-400">
               {session.apgar5MinParams?.skipped ? 'Skipped' : `${session.apgar5MinParams?.total ?? '?'}/10`}
             </span>
-            {expanded && renderScores(session.apgar5MinParams)}
+            {!expanded5 && <span className="text-[9px] text-slate-400 mt-2 uppercase tracking-widest bg-slate-200/50 dark:bg-slate-800 px-2 py-1 rounded-full">Tap for details</span>}
+            {expanded5 && renderScores(session.apgar5MinParams)}
           </div>
         </div>
       </div>
@@ -162,7 +172,7 @@ export const HistoryTab = () => {
             <Cloud size={14} className="text-emerald-500" /> Synced
           </div>
           {(cloudSessions.length > 0 || localQueue.length > 0) && (
-            <button 
+            <button
               onClick={() => setShowConfirm(true)}
               className="bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400 p-2 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors"
             >
@@ -176,7 +186,7 @@ export const HistoryTab = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm">
           <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-            
+
             <div className="flex flex-col items-center text-center gap-4 relative z-10">
               <div className="bg-rose-100 dark:bg-rose-900/30 p-4 rounded-full text-rose-500 dark:text-rose-400 mb-2">
                 <AlertTriangle size={40} strokeWidth={2.5} />
@@ -185,15 +195,15 @@ export const HistoryTab = () => {
               <p className="text-slate-500 dark:text-slate-400 font-medium mb-4">
                 This will permanently delete all recorded birth sessions from this device and the cloud. This cannot be undone.
               </p>
-              
+
               <div className="flex flex-col gap-3 w-full">
-                <button 
+                <button
                   onClick={handleDeleteAll}
                   className="w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-black text-lg shadow-lg shadow-rose-500/30 transition-all active:scale-95 touch-manipulation"
                 >
                   Yes, Delete All
                 </button>
-                <button 
+                <button
                   onClick={() => setShowConfirm(false)}
                   className="w-full py-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-all"
                 >

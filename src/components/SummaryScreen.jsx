@@ -37,6 +37,35 @@ export const SummaryScreen = () => {
         return `${m}m ${s}s`;
     };
 
+    const renderDetailedScores = (params) => {
+        if (!params || params.skipped || !params.scores) return null;
+        const s = params.scores;
+        return (
+            <div className="flex flex-col gap-2 mt-5 w-full text-sm text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-900/40 p-4 rounded-2xl border border-white/40 dark:border-slate-700/50 shadow-sm">
+                <div className="flex justify-between w-full border-b border-slate-200/60 dark:border-slate-700/60 pb-1.5">
+                    <span className="text-slate-500 dark:text-slate-400">Color (Appearance):</span>
+                    <span className="font-black text-base">{s.appearance}</span>
+                </div>
+                <div className="flex justify-between w-full border-b border-slate-200/60 dark:border-slate-700/60 pb-1.5">
+                    <span className="text-slate-500 dark:text-slate-400">Pulse (Heart Rate):</span>
+                    <span className="font-black text-base">{s.pulse}</span>
+                </div>
+                <div className="flex justify-between w-full border-b border-slate-200/60 dark:border-slate-700/60 pb-1.5">
+                    <span className="text-slate-500 dark:text-slate-400">Grimace (Reflex):</span>
+                    <span className="font-black text-base">{s.grimace}</span>
+                </div>
+                <div className="flex justify-between w-full border-b border-slate-200/60 dark:border-slate-700/60 pb-1.5">
+                    <span className="text-slate-500 dark:text-slate-400">Tone (Activity):</span>
+                    <span className="font-black text-base">{s.activity}</span>
+                </div>
+                <div className="flex justify-between w-full pt-1.5">
+                    <span className="text-slate-500 dark:text-slate-400">Breathing (Respiration):</span>
+                    <span className="font-black text-base">{s.respiration}</span>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="w-full mt-8 p-6 sm:p-8 bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-xl shadow-slate-200/50 dark:shadow-none border-2 border-slate-100 dark:border-slate-700 overflow-hidden">
             <h3 className="text-2xl font-black mb-6 flex items-center justify-center gap-2 text-slate-800 dark:text-slate-100">
@@ -47,7 +76,7 @@ export const SummaryScreen = () => {
                 <div className="flex flex-col sm:flex-row justify-between bg-slate-50 dark:bg-slate-700/50 p-5 rounded-2xl items-start sm:items-center">
                     <span className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-xs mb-1 sm:mb-0">Head Out Logged</span>
                     <span className="font-bold text-slate-900 dark:text-white flex items-center">
-                      {formatTimestamp(deliveryStartTime)} <TimeZoneBadge />
+                        {formatTimestamp(deliveryStartTime)} <TimeZoneBadge />
                     </span>
                 </div>
 
@@ -64,46 +93,54 @@ export const SummaryScreen = () => {
                 ))}
 
                 {apgar1MinParams && (
-                    <div className="flex flex-col sm:flex-row justify-between bg-violet-50 dark:bg-violet-900/10 p-5 rounded-2xl items-start sm:items-center relative">
-                        <span className="font-bold text-violet-800 dark:text-violet-300 uppercase tracking-wider text-xs mb-4 sm:mb-0">1-Min APGAR</span>
-                        <div className="text-left sm:text-right flex items-center gap-4">
-                            <div>
-                                <div className="font-black text-3xl text-violet-600 dark:text-violet-400 mb-1">
-                                    {apgar1MinParams.skipped ? 'Skipped' : `Score: ${apgar1MinParams.total}/10`}
+                    <div className="flex flex-col bg-violet-50 dark:bg-violet-900/10 p-5 sm:p-6 rounded-3xl relative">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full">
+                            <span className="font-bold text-violet-800 dark:text-violet-300 uppercase tracking-wider text-xs mb-4 sm:mb-0">1-Min APGAR</span>
+                            <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                                <div className="text-left sm:text-right">
+                                    <div className="font-black text-5xl sm:text-6xl text-violet-600 dark:text-violet-400 mb-1 tracking-tight">
+                                        {apgar1MinParams.skipped ? 'Skipped' : `${apgar1MinParams.total}/10`}
+                                    </div>
+                                    <div className="text-xs sm:text-sm text-violet-500/70 dark:text-violet-300/60 font-medium flex items-center justify-start sm:justify-end">
+                                        Logged at: {formatTimestamp(apgar1MinParams.timeCompleted)} <TimeZoneBadge />
+                                    </div>
                                 </div>
-                                <div className="text-sm text-violet-500/70 dark:text-violet-300/60 font-medium flex items-center">
-                                    Logged at: {formatTimestamp(apgar1MinParams.timeCompleted)} <TimeZoneBadge />
-                                </div>
+                                <button
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); openApgarModal(1); }}
+                                    className="p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors self-start sm:self-center"
+                                >
+                                    <Edit2 size={20} />
+                                </button>
                             </div>
-                            <button 
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); openApgarModal(1); }}
-                                className="p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
-                            >
-                                <Edit2 size={18} />
-                            </button>
                         </div>
+                        {/* Render detailed breakdown automatically */}
+                        {renderDetailedScores(apgar1MinParams)}
                     </div>
                 )}
 
                 {apgar5MinParams && (
-                    <div className="flex flex-col sm:flex-row justify-between bg-sky-50 dark:bg-sky-900/10 p-5 rounded-2xl items-start sm:items-center relative">
-                        <span className="font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider text-xs mb-4 sm:mb-0">5-Min APGAR</span>
-                        <div className="text-left sm:text-right flex items-center gap-4">
-                            <div>
-                                <div className="font-black text-3xl text-sky-600 dark:text-sky-400 mb-1">
-                                    {apgar5MinParams.skipped ? 'Skipped' : `Score: ${apgar5MinParams.total}/10`}
+                    <div className="flex flex-col bg-sky-50 dark:bg-sky-900/10 p-5 sm:p-6 rounded-3xl relative">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full">
+                            <span className="font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider text-xs mb-4 sm:mb-0">5-Min APGAR</span>
+                            <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                                <div className="text-left sm:text-right">
+                                    <div className="font-black text-5xl sm:text-6xl text-sky-600 dark:text-sky-400 mb-1 tracking-tight">
+                                        {apgar5MinParams.skipped ? 'Skipped' : `${apgar5MinParams.total}/10`}
+                                    </div>
+                                    <div className="text-xs sm:text-sm text-sky-500/70 dark:text-sky-300/60 font-medium flex items-center justify-start sm:justify-end">
+                                        Logged at: {formatTimestamp(apgar5MinParams.timeCompleted)} <TimeZoneBadge />
+                                    </div>
                                 </div>
-                                <div className="text-sm text-sky-500/70 dark:text-sky-300/60 font-medium flex items-center">
-                                    Logged at: {formatTimestamp(apgar5MinParams.timeCompleted)} <TimeZoneBadge />
-                                </div>
+                                <button
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); openApgarModal(5); }}
+                                    className="p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors self-start sm:self-center"
+                                >
+                                    <Edit2 size={20} />
+                                </button>
                             </div>
-                            <button 
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); openApgarModal(5); }}
-                                className="p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
-                            >
-                                <Edit2 size={18} />
-                            </button>
                         </div>
+                        {/* Render detailed breakdown automatically */}
+                        {renderDetailedScores(apgar5MinParams)}
                     </div>
                 )}
             </div>
