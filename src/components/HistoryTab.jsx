@@ -35,17 +35,55 @@ export const HistoryTab = () => {
     return `${m}m ${s}s`;
   };
 
+  const getTimezoneBadge = (tz) => {
+    try {
+      const options = { timeZoneName: 'short' };
+      if (tz) options.timeZone = tz;
+      const formatted = new Date().toLocaleTimeString('en-us', options).split(' ').pop();
+      return <span className="text-[10px] bg-slate-200/50 dark:bg-slate-700 text-slate-500 rounded px-1 ml-1">{formatted}</span>;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const formatTimeWithTz = (ts, tz) => {
+    if (!ts) return '';
+    try {
+      const options = { hour: 'numeric', minute: '2-digit' };
+      if (tz) options.timeZone = tz;
+      return new Date(ts).toLocaleTimeString('en-us', options);
+    } catch(e) {
+      return format(new Date(ts), "h:mm a");
+    }
+  };
+
   const SessionCard = ({ session, isOffline }) => {
+    const [expanded, setExpanded] = useState(false);
     const dateObj = new Date(session.deliveryStartTime);
     const dateFormatted = format(dateObj, "MMM do, yyyy");
+    const tz = session.recordedTimeZone;
 
     // Head Out specific tracking
-    const headOutTime = format(dateObj, "h:mm a");
+    const headOutTime = formatTimeWithTz(session.deliveryStartTime, tz);
 
     // Body Out tracking
     const bodyOutMs = session.bodyOutTimes && session.bodyOutTimes.length > 0 ? session.bodyOutTimes[0] : null;
-    const bodyOutTime = bodyOutMs ? format(new Date(bodyOutMs), "h:mm a") : null;
+    const bodyOutTime = bodyOutMs ? formatTimeWithTz(bodyOutMs, tz) : null;
     const headToBodyDuration = bodyOutMs ? formatDuration(session.deliveryStartTime, bodyOutMs) : null;
+
+    const renderScores = (params) => {
+      if (!params || params.skipped || !params.scores) return null;
+      const s = params.scores;
+      return (
+        <div className="flex flex-col gap-0.5 mt-2 w-full text-[10px] text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-slate-800/50 p-2 rounded-xl">
+          <div className="flex justify-between w-full"><span>Color:</span><span className="font-bold">{s.appearance}</span></div>
+          <div className="flex justify-between w-full"><span>Pulse:</span><span className="font-bold">{s.pulse}</span></div>
+          <div className="flex justify-between w-full"><span>Grimace:</span><span className="font-bold">{s.grimace}</span></div>
+          <div className="flex justify-between w-full"><span>Tone:</span><span className="font-bold">{s.activity}</span></div>
+          <div className="flex justify-between w-full"><span>Breathing:</span><span className="font-bold">{s.respiration}</span></div>
+        </div>
+      );
+    };
 
     return (
       <div className={`p-5 rounded-3xl shadow-sm border-2 ${isOffline ? 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800' : 'bg-white border-slate-100 dark:bg-slate-800 dark:border-slate-700'} mb-4 relative overflow-hidden`}>
@@ -62,13 +100,15 @@ export const HistoryTab = () => {
             <div className="flex flex-col gap-1 mt-2">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest w-20">Head Out:</span>
-                <span className="text-slate-700 dark:text-slate-300 font-semibold">{headOutTime}</span>
+                <span className="text-slate-700 dark:text-slate-300 font-semibold flex items-center">
+                  {headOutTime} {getTimezoneBadge(tz)}
+                </span>
               </div>
               {bodyOutTime && (
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest w-20">Body Out:</span>
                   <span className="text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-2">
-                    {bodyOutTime}
+                    <span className="flex items-center">{bodyOutTime} {getTimezoneBadge(tz)}</span>
                     <span className="bg-rose-100 dark:bg-rose-900/30 text-rose-500 text-[10px] px-2 py-0.5 rounded-md">
                       +{headToBodyDuration}
                     </span>
@@ -86,18 +126,24 @@ export const HistoryTab = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-3 flex flex-col justify-center items-center">
+        <div 
+          className="grid grid-cols-2 gap-3 cursor-pointer" 
+          onClick={() => setExpanded(!expanded)}
+          title="Click to toggle full APGAR scores"
+        >
+          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-3 flex flex-col justify-start items-center h-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">1-Min Score</span>
             <span className="text-2xl font-black text-violet-600 dark:text-violet-400">
               {session.apgar1MinParams?.skipped ? 'Skipped' : `${session.apgar1MinParams?.total ?? '?'}/10`}
             </span>
+            {expanded && renderScores(session.apgar1MinParams)}
           </div>
-          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-3 flex flex-col justify-center items-center">
+          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-3 flex flex-col justify-start items-center h-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">5-Min Score</span>
             <span className="text-2xl font-black text-sky-600 dark:text-sky-400">
               {session.apgar5MinParams?.skipped ? 'Skipped' : `${session.apgar5MinParams?.total ?? '?'}/10`}
             </span>
+            {expanded && renderScores(session.apgar5MinParams)}
           </div>
         </div>
       </div>

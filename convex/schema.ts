@@ -3,6 +3,7 @@ import { v } from "convex/values";
 
 export default defineSchema({
   sessions: defineTable({
+    recordedTimeZone: v.optional(v.string()),
     deliveryStartTime: v.number(),
     bodyOutTimes: v.array(v.number()),
     apgar1MinParams: v.union(

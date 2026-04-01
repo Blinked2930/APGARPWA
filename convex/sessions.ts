@@ -10,6 +10,7 @@ export const getSessions = query({
 
 export const saveSession = mutation({
   args: {
+    recordedTimeZone: v.optional(v.string()),
     deliveryStartTime: v.number(),
     bodyOutTimes: v.array(v.number()),
     apgar1MinParams: v.union(

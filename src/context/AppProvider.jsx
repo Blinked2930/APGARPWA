@@ -11,6 +11,10 @@ export const AppProvider = ({ children }) => {
     return saved ? parseInt(saved, 10) : null;
   });
 
+  const [recordedTimeZone, setRecordedTimeZone] = useState(() => {
+    return localStorage.getItem('recordedTimeZone') || null;
+  });
+
   const [bodyOutTimes, setBodyOutTimes] = useState(() => {
     const saved = localStorage.getItem('bodyOutTimes');
     return saved ? JSON.parse(saved) : [];
@@ -43,12 +47,14 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     if (deliveryStartTime) {
       localStorage.setItem('deliveryStartTime', deliveryStartTime.toString());
+      if (recordedTimeZone) localStorage.setItem('recordedTimeZone', recordedTimeZone);
       requestWakeLock();
     } else {
       localStorage.removeItem('deliveryStartTime');
+      localStorage.removeItem('recordedTimeZone');
       releaseWakeLock();
     }
-  }, [deliveryStartTime, requestWakeLock, releaseWakeLock]);
+  }, [deliveryStartTime, recordedTimeZone, requestWakeLock, releaseWakeLock]);
 
   useEffect(() => {
     localStorage.setItem('bodyOutTimes', JSON.stringify(bodyOutTimes));
@@ -73,22 +79,28 @@ export const AppProvider = ({ children }) => {
   const startDelivery = () => {
     if (!deliveryStartTime) {
       setDeliveryStartTime(Date.now());
+      setRecordedTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
     }
   };
 
   const stopDelivery = () => {
     setDeliveryStartTime(null);
+    setRecordedTimeZone(null);
     setBodyOutTimes([]);
     setApgar1MinParams(null);
     setApgar5MinParams(null);
     localStorage.removeItem('deliveryStartTime');
+    localStorage.removeItem('recordedTimeZone');
     localStorage.removeItem('bodyOutTimes');
     localStorage.removeItem('apgar1MinParams');
     localStorage.removeItem('apgar5MinParams');
   };
 
   const markBodyOut = () => {
-    setDeliveryStartTime(prev => prev ? prev : Date.now());
+    if (!deliveryStartTime) {
+      setDeliveryStartTime(Date.now());
+      setRecordedTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    }
     setBodyOutTimes(prev => {
       if (prev.length === 0) return [Date.now()];
       return prev;
@@ -102,6 +114,7 @@ export const AppProvider = ({ children }) => {
       setApgar5MinParams(scoreData);
       // Auto queue the session for backup when 5min is finished!
       queueSession({
+        recordedTimeZone,
         deliveryStartTime,
         bodyOutTimes,
         apgar1MinParams,
@@ -115,6 +128,7 @@ export const AppProvider = ({ children }) => {
 
   return (
     <AppContext.Provider value={{
+      recordedTimeZone,
       deliveryStartTime,
       bodyOutTimes,
       apgar1MinParams,
