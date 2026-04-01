@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAppContext } from '../context/AppProvider';
-import { FileText, RefreshCcw } from 'lucide-react';
+import { FileText, RefreshCcw, AlertTriangle } from 'lucide-react';
 
 export const SummaryScreen = () => {
     const { deliveryStartTime, bodyOutTimes, apgar1MinParams, apgar5MinParams, stopDelivery } = useAppContext();
+    const [showConfirm, setShowConfirm] = useState(false);
 
     if (!deliveryStartTime) return null;
 
@@ -24,15 +25,15 @@ export const SummaryScreen = () => {
     return (
         <div className="w-full mt-8 p-6 sm:p-8 bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-xl shadow-slate-200/50 dark:shadow-none border-2 border-slate-100 dark:border-slate-700 overflow-hidden">
             <h3 className="text-2xl font-black mb-6 flex items-center justify-center gap-2 text-slate-800 dark:text-slate-100">
-                <FileText className="text-sky-500" strokeWidth={2.5}/> Birth Summary
+                <FileText className="text-sky-500" strokeWidth={2.5} /> Birth Summary
             </h3>
-            
+
             <div className="space-y-4 text-lg">
                 <div className="flex flex-col sm:flex-row justify-between bg-slate-50 dark:bg-slate-700/50 p-5 rounded-2xl items-start sm:items-center">
-                    <span className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-xs mb-1 sm:mb-0">Timer Started</span>
+                    <span className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-xs mb-1 sm:mb-0">Head Out Logged</span>
                     <span className="font-bold text-slate-900 dark:text-white">{formatTimestamp(deliveryStartTime)}</span>
                 </div>
-                
+
                 {bodyOutTimes.map((ts, idx) => (
                     <div key={idx} className="flex flex-col sm:flex-row justify-between bg-rose-50 dark:bg-rose-900/10 p-5 rounded-2xl text-rose-600 dark:text-rose-400 items-start sm:items-center">
                         <span className="font-bold flex items-center gap-2 uppercase tracking-wider text-xs mb-2 sm:mb-0">
@@ -66,14 +67,31 @@ export const SummaryScreen = () => {
                 )}
             </div>
 
-            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700 font-semibold">
-                <button 
-                  onClick={stopDelivery}
-                  className="w-full py-5 text-lg text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 transition-all flex items-center justify-center gap-2 active:scale-95 touch-manipulation font-bold"
-                >
-                  <RefreshCcw size={20} />
-                  RESET EVERYTHING
-                </button>
+            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700 font-semibold relative">
+                {!showConfirm ? (
+                    <button
+                        onClick={() => setShowConfirm(true)}
+                        className="w-full py-5 text-lg text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 transition-all flex items-center justify-center gap-2 active:scale-95 touch-manipulation font-bold"
+                    >
+                        <RefreshCcw size={20} />
+                        RESET EXACT TIMERS
+                    </button>
+                ) : (
+                    <div className="bg-rose-50 dark:bg-rose-900/20 rounded-2xl p-4 border border-rose-200 dark:border-rose-800/50">
+                        <p className="text-rose-600 dark:text-rose-400 font-bold text-center mb-4 flex items-center justify-center gap-2">
+                            <AlertTriangle size={20} />
+                            Are you sure? This cannot be undone.
+                        </p>
+                        <div className="flex gap-3">
+                            <button onClick={() => setShowConfirm(false)} className="flex-1 py-3 text-slate-500 bg-white dark:bg-slate-800 rounded-xl font-bold active:scale-95 touch-manipulation">
+                                Cancel
+                            </button>
+                            <button onClick={stopDelivery} className="flex-1 py-3 text-white bg-rose-500 hover:bg-rose-600 rounded-xl font-bold active:scale-95 touch-manipulation shadow-md shadow-rose-500/20">
+                                Yes, Reset All
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -75,13 +75,11 @@ export const AppProvider = ({ children }) => {
   };
 
   const stopDelivery = () => {
-    if (window.confirm('Are you sure you want to completely reset all timers? This cannot be undone.')) {
-      setDeliveryStartTime(null);
-      setBodyOutTimes([]);
-      setApgar1MinParams(null);
-      setApgar5MinParams(null);
-      localStorage.clear();
-    }
+    setDeliveryStartTime(null);
+    setBodyOutTimes([]);
+    setApgar1MinParams(null);
+    setApgar5MinParams(null);
+    localStorage.clear();
   };
 
   const markBodyOut = () => {

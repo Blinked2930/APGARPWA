@@ -3,7 +3,7 @@ import { useAppContext } from '../context/AppProvider';
 import { Play } from 'lucide-react';
 
 export const Stopwatch = () => {
-  const { deliveryStartTime, apgar5MinParams, audioMode, playChime, speakTime, startDelivery } = useAppContext();
+  const { deliveryStartTime, bodyOutTimes, apgar5MinParams, audioMode, playChime, speakTime, startDelivery } = useAppContext();
   const [elapsed, setElapsed] = useState(0);
   const rafRef = useRef(null);
   const lastIntervalRef = useRef(0);
@@ -19,17 +19,17 @@ export const Stopwatch = () => {
       const now = apgar5MinParams ? apgar5MinParams.timeCompleted : Date.now();
       const diff = now - deliveryStartTime;
       setElapsed(diff);
-      
+
       if (apgar5MinParams) {
-         if (rafRef.current) cancelAnimationFrame(rafRef.current);
-         return;
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        return;
       }
-      
+
       const currentSeconds = Math.floor(diff / 1000);
-      // check every 30s
-      if (currentSeconds > 0 && currentSeconds % 30 === 0 && currentSeconds !== lastIntervalRef.current) {
+      // check every 30s only during 'labor' phase before Body Out
+      if (bodyOutTimes.length === 0 && currentSeconds > 0 && currentSeconds % 30 === 0 && currentSeconds !== lastIntervalRef.current) {
         lastIntervalRef.current = currentSeconds;
-        
+
         if (audioMode === 'VOICE') {
           speakTime(currentSeconds);
         } else if (audioMode === 'CHIME') {
@@ -45,7 +45,7 @@ export const Stopwatch = () => {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [deliveryStartTime, apgar5MinParams, audioMode, playChime, speakTime]);
+  }, [deliveryStartTime, apgar5MinParams, bodyOutTimes, audioMode, playChime, speakTime]);
 
   const formatTime = (ms) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -61,7 +61,7 @@ export const Stopwatch = () => {
       </div>
       <div className="text-slate-400 font-bold uppercase tracking-widest text-sm mb-6">Total Delivery Time</div>
       {!deliveryStartTime && (
-        <button 
+        <button
           onClick={startDelivery}
           className="flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white text-2xl font-black py-6 px-12 w-full max-w-sm rounded-[2.5rem] shadow-xl shadow-emerald-500/20 transition-all active:scale-95 touch-manipulation border border-white/20 mb-6"
         >
