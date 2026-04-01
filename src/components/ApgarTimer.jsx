@@ -2,6 +2,23 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useAppContext } from '../context/AppProvider';
 import { Clock, Edit2, Plus } from 'lucide-react';
 
+const StatusBadge = ({ interval, isDone, isSkipped, openApgarModal }) => {
+    if (!isDone) return null;
+    return (
+        <button 
+            onPointerDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openApgarModal(interval);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100/50 hover:bg-slate-200/50 dark:bg-slate-800/50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 rounded-xl transition-colors font-bold text-xs uppercase tracking-wider border border-slate-200 dark:border-slate-700 relative z-50"
+        >
+            {isSkipped ? <Plus size={14} /> : <Edit2 size={14} />}
+            {isSkipped ? 'Enter' : 'Edit'}
+        </button>
+    );
+};
+
 export const ApgarTimer = () => {
     const { bodyOutTimes, apgar1MinParams, apgar5MinParams, openApgarModal } = useAppContext();
     const [elapsed, setElapsed] = useState(0);
@@ -29,13 +46,13 @@ export const ApgarTimer = () => {
     if (bodyOutTimes.length === 0) return null;
 
     // 1 Min tracker
-    const target1 = 60 * 1000;
+    const target1 = 5 * 1000;
     const progress1 = Math.min((elapsed / target1) * 100, 100);
     const is1MinDone = !!apgar1MinParams;
     const is1MinSkipped = apgar1MinParams?.skipped;
 
     // 5 Min tracker
-    const target5 = 300 * 1000;
+    const target5 = 15 * 1000;
     const progress5 = Math.min((elapsed / target5) * 100, 100);
     const is5MinDone = !!apgar5MinParams;
     const is5MinSkipped = apgar5MinParams?.skipped;
@@ -47,23 +64,6 @@ export const ApgarTimer = () => {
         const m = Math.floor(remaining / 60);
         const s = remaining % 60;
         return `in ${m}:${s.toString().padStart(2, '0')}`;
-    };
-
-    const StatusBadge = ({ interval, isDone, isSkipped }) => {
-        if (!isDone) return null;
-        return (
-            <button 
-                onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openApgarModal(interval);
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100/50 hover:bg-slate-200/50 dark:bg-slate-800/50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 rounded-xl transition-colors font-bold text-xs uppercase tracking-wider border border-slate-200 dark:border-slate-700 relative z-50"
-            >
-                {isSkipped ? <Plus size={14} /> : <Edit2 size={14} />}
-                {isSkipped ? 'Enter' : 'Edit'}
-            </button>
-        );
     };
 
     return (
@@ -85,7 +85,7 @@ export const ApgarTimer = () => {
                                 {formatCountdown(target1, elapsed, is1MinDone, is1MinSkipped)}
                             </span>
                         </div>
-                        <StatusBadge interval={1} isDone={is1MinDone} isSkipped={is1MinSkipped} />
+                        <StatusBadge interval={1} isDone={is1MinDone} isSkipped={is1MinSkipped} openApgarModal={openApgarModal} />
                     </div>
                     <div className="h-4 w-full bg-slate-200/50 dark:bg-slate-900/50 rounded-full overflow-hidden flex relative border border-slate-200 dark:border-slate-800">
                         <div 
@@ -104,7 +104,7 @@ export const ApgarTimer = () => {
                                 {formatCountdown(target5, elapsed, is5MinDone, is5MinSkipped)}
                             </span>
                         </div>
-                        <StatusBadge interval={5} isDone={is5MinDone} isSkipped={is5MinSkipped} />
+                        <StatusBadge interval={5} isDone={is5MinDone} isSkipped={is5MinSkipped} openApgarModal={openApgarModal} />
                     </div>
                     <div className="h-4 w-full bg-slate-200/50 dark:bg-slate-900/50 rounded-full overflow-hidden flex relative border border-slate-200 dark:border-slate-800">
                         <div 

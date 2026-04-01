@@ -81,7 +81,10 @@ export const AppProvider = ({ children }) => {
     setBodyOutTimes([]);
     setApgar1MinParams(null);
     setApgar5MinParams(null);
-    localStorage.clear();
+    localStorage.removeItem('deliveryStartTime');
+    localStorage.removeItem('bodyOutTimes');
+    localStorage.removeItem('apgar1MinParams');
+    localStorage.removeItem('apgar5MinParams');
   };
 
   const markBodyOut = () => {

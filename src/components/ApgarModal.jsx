@@ -13,6 +13,12 @@ const CATEGORIES = [
 export const ApgarModal = ({ interval, onClose }) => {
   const { saveApgarScore } = useAppContext();
   const [scores, setScores] = useState({});
+  const [canClose, setCanClose] = useState(false);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setCanClose(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleScore = (categoryId, value) => {
     setScores(prev => ({ ...prev, [categoryId]: value }));
@@ -33,6 +39,7 @@ export const ApgarModal = ({ interval, onClose }) => {
   };
 
   const handleSkip = () => {
+    if (!canClose) return;
     saveApgarScore(interval, {
       skipped: true,
       timeCompleted: Date.now()
@@ -40,10 +47,16 @@ export const ApgarModal = ({ interval, onClose }) => {
     onClose();
   };
 
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      handleSkip();
+    }
+  };
+
   return (
     <div 
-      className="fixed inset-0 z-50 flex flex-col justify-end p-2 sm:p-4 bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm transition-all"
-      onClick={handleSkip}
+      className="fixed inset-0 z-[100] flex flex-col justify-end p-2 sm:p-4 bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-[4px] transition-all"
+      onClick={handleBackdropClick}
     >
       <div 
         className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[2.5rem] shadow-2xl shadow-indigo-500/10 w-full max-w-2xl mx-auto p-5 sm:p-8 border border-white/50 dark:border-slate-700 pointer-events-auto overflow-y-auto max-h-[85vh] mb-safe"
