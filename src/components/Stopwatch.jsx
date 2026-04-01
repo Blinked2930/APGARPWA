@@ -56,24 +56,23 @@ export const Stopwatch = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-2 w-full relative mt-4">
-      <div className="text-[6.5rem] sm:text-[9rem] font-black tracking-tighter mb-1 leading-none text-slate-800 dark:text-white drop-shadow-sm font-mono origin-center">
+    <div className="flex flex-col items-center justify-center py-2 w-full relative mt-2 sm:mt-4">
+      <div className="text-[5.5rem] sm:text-[8rem] font-black tracking-tighter mb-1 leading-none text-slate-800 dark:text-white drop-shadow-sm font-mono origin-center">
         {formatTime(elapsed)}
       </div>
-      <div className="text-slate-400 font-bold uppercase tracking-widest text-sm mb-6 flex items-center gap-2">
-        <span className="w-8 h-px bg-slate-200 dark:bg-slate-700"></span>
+      <div className="text-slate-400 font-bold uppercase tracking-widest text-[10px] sm:text-sm mb-6 flex items-center gap-2">
+        <span className="w-6 sm:w-8 h-px bg-slate-200 dark:bg-slate-700"></span>
         Total Delivery Time
-        <span className="w-8 h-px bg-slate-200 dark:bg-slate-700"></span>
+        <span className="w-6 sm:w-8 h-px bg-slate-200 dark:bg-slate-700"></span>
       </div>
 
       {!deliveryStartTime && (
         <button
           onClick={startDelivery}
-          className="relative overflow-hidden group flex items-center justify-center gap-3 bg-gradient-to-br from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-2xl font-black py-6 px-12 w-full max-w-sm rounded-[2.5rem] shadow-xl shadow-indigo-500/30 transition-all active:scale-95 touch-manipulation border border-indigo-400/20 mb-6"
+          className="relative overflow-hidden group flex items-center justify-center gap-3 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-2xl font-black py-5 sm:py-6 px-10 sm:px-12 w-full max-w-sm rounded-[2rem] sm:rounded-[2.5rem] shadow-sm border-2 border-indigo-200 dark:border-indigo-800/50 transition-all active:scale-95 touch-manipulation mb-4 sm:mb-6"
         >
-          <div className="absolute inset-0 bg-white/20 opacity-0 group-active:opacity-100 transition-opacity"></div>
-          <Play fill="currentColor" size={28} className="drop-shadow-sm" />
-          <span className="drop-shadow-sm tracking-wide">HEAD OUT</span>
+          <Play fill="currentColor" size={28} />
+          <span className="tracking-wide">HEAD OUT</span>
         </button>
       )}
 

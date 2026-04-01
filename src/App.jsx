@@ -16,17 +16,17 @@ const MainTimerView = () => {
   const isBirthFinished = !!apgar5MinParams;
 
   return (
-    <div className="w-full max-w-2xl flex flex-col items-center gap-6 pb-24 px-4 sm:px-6">
+    <div className="w-full max-w-2xl flex flex-col items-center gap-4 sm:gap-6 pb-24 px-4 sm:px-6">
 
       <Stopwatch />
 
       {!isBirthFinished && (
         <>
           <div className="w-full grid grid-cols-4 sm:grid-cols-5 gap-3 sm:gap-4 mt-2">
-            <div className="col-span-1 h-[8rem] sm:h-40">
+            <div className="col-span-1 h-[7rem] sm:h-36">
               <AudioToggle />
             </div>
-            <div className="col-span-3 sm:col-span-4 h-[8rem] sm:h-40">
+            <div className="col-span-3 sm:col-span-4 h-[7rem] sm:h-36">
               <BodyOutButton />
             </div>
           </div>
@@ -46,7 +46,7 @@ const AppContent = () => {
 
   return (
     <div className="min-h-screen text-slate-900 dark:text-slate-100 font-sans flex flex-col items-center selection:bg-transparent transition-colors pt-4 sm:pt-6 bg-slate-50 dark:bg-slate-950 overflow-y-auto pb-[100px] relative">
-      
+
       {/* Decorative ambient background glows */}
       <div className="fixed top-0 inset-x-0 h-48 sm:h-64 bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] pointer-events-none"></div>
 

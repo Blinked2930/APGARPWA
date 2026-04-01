@@ -10,7 +10,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  @apply bg-rose-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100;
+  @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100;
   user-select: none;
   /* Prevent accidental text selection in high pressure environments */
   -webkit-touch-callout: none;
