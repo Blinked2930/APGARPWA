@@ -8,43 +8,14 @@ export const getSessions = query({
   },
 });
 
+// Relaxed args so "In Progress" and skipped saves never get blocked
 export const saveSession = mutation({
   args: {
-    recordedTimeZone: v.union(v.string(), v.null(), v.optional(v.string())),
+    recordedTimeZone: v.optional(v.any()),
     deliveryStartTime: v.number(),
     bodyOutTimes: v.array(v.number()),
-    apgar1MinParams: v.union(
-      v.object({
-        skipped: v.optional(v.boolean()),
-        inProgress: v.optional(v.boolean()),
-        scores: v.optional(v.object({
-          activity: v.optional(v.number()),
-          appearance: v.optional(v.number()),
-          grimace: v.optional(v.number()),
-          pulse: v.optional(v.number()),
-          respiration: v.optional(v.number())
-        })),
-        timeCompleted: v.number(),
-        total: v.optional(v.number())
-      }),
-      v.null()
-    ),
-    apgar5MinParams: v.union(
-      v.object({
-        skipped: v.optional(v.boolean()),
-        inProgress: v.optional(v.boolean()),
-        scores: v.optional(v.object({
-          activity: v.optional(v.number()),
-          appearance: v.optional(v.number()),
-          grimace: v.optional(v.number()),
-          pulse: v.optional(v.number()),
-          respiration: v.optional(v.number())
-        })),
-        timeCompleted: v.number(),
-        total: v.optional(v.number())
-      }),
-      v.null()
-    )
+    apgar1MinParams: v.optional(v.any()),
+    apgar5MinParams: v.optional(v.any())
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("sessions", args);
@@ -68,17 +39,20 @@ export const deleteSession = mutation({
   },
 });
 
-// NEW: Allows editing a session inline from the History Tab without duplicating it
 export const updateSession = mutation({
   args: {
     id: v.id("sessions"),
-    interval: v.number(),
-    data: v.any() // Accepts the updated score block
+    deliveryStartTime: v.optional(v.number()),
+    bodyOutTimes: v.optional(v.array(v.number())),
+    apgar1MinParams: v.optional(v.any()),
+    apgar5MinParams: v.optional(v.any())
   },
   handler: async (ctx, args) => {
-    const updateObj = args.interval === 1
-      ? { apgar1MinParams: args.data }
-      : { apgar5MinParams: args.data };
-    await ctx.db.patch(args.id, updateObj);
+    const { id, ...updates } = args;
+
+    // Clean out any explicitly undefined fields to satisfy Convex patch rules
+    Object.keys(updates).forEach(key => updates[key] === undefined && delete updates[key]);
+
+    await ctx.db.patch(id, updates);
   },
 });

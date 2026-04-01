@@ -6,47 +6,38 @@ export const Stopwatch = () => {
   const { deliveryStartTime, bodyOutTimes, apgar5MinParams, audioMode, playChime, speakTime, startDelivery, stopDelivery } = useAppContext();
   const [elapsed, setElapsed] = useState(0);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const rafRef = useRef(null);
-  const lastIntervalRef = useRef(0);
+  const lastMilestoneRef = useRef(0);
 
   useEffect(() => {
     if (!deliveryStartTime) {
       setElapsed(0);
-      lastIntervalRef.current = 0;
+      lastMilestoneRef.current = 0;
       return;
     }
 
-    const tick = () => {
+    // Swapped to setInterval because requestAnimationFrame pauses entirely when screen dims
+    const interval = setInterval(() => {
       const now = apgar5MinParams ? apgar5MinParams.timeCompleted : Date.now();
       const diff = now - deliveryStartTime;
       setElapsed(diff);
 
-      if (apgar5MinParams) {
-        if (rafRef.current) cancelAnimationFrame(rafRef.current);
-        return;
-      }
+      if (apgar5MinParams) return;
 
-      const currentSeconds = Math.floor(diff / 1000);
-      // check every 30s only during 'labor' phase before Body Out
-      if (bodyOutTimes.length === 0 && currentSeconds > 0 && currentSeconds % 30 === 0 && currentSeconds !== lastIntervalRef.current) {
-        lastIntervalRef.current = currentSeconds;
+      // Head Out specific logic (only run before Body Out is marked)
+      if (bodyOutTimes.length === 0) {
+        const current30sBlock = Math.floor(diff / 30000);
+        if (current30sBlock > 0 && current30sBlock > lastMilestoneRef.current) {
+          lastMilestoneRef.current = current30sBlock;
+          const announceSeconds = current30sBlock * 30;
 
-        if (audioMode === 'VOICE') {
-          speakTime(currentSeconds);
-        } else if (audioMode === 'CHIME') {
-          playChime();
+          if (audioMode === 'VOICE') speakTime(announceSeconds);
+          else if (audioMode === 'CHIME') playChime();
         }
       }
+    }, 250); // Checking 4 times a second is highly resilient
 
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [deliveryStartTime, apgar5MinParams, bodyOutTimes, audioMode, playChime, speakTime]);
+    return () => clearInterval(interval);
+  }, [deliveryStartTime, apgar5MinParams, bodyOutTimes.length, audioMode, playChime, speakTime]);
 
   const formatTime = (ms) => {
     const totalSeconds = Math.floor(ms / 1000);

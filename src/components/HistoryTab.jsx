@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { format } from "date-fns";
-import { CalendarDays, CloudOff, Cloud, CheckCircle2, Trash2, AlertTriangle, Edit2, Info } from "lucide-react";
+import { CalendarDays, CloudOff, Cloud, CheckCircle2, Trash2, AlertTriangle, Edit2, Info, Clock, RefreshCw, AlertCircle } from "lucide-react";
 import { ApgarModal } from './ApgarModal';
+import { useAppContext } from '../context/AppProvider';
 
 // Extracted helper functions
 const formatDuration = (start, end) => {
@@ -36,7 +37,72 @@ const formatTimeWithTz = (ts, tz) => {
   }
 };
 
-const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, deleteSingleSession, setModalState, onEditScore }) => {
+const toDatetimeLocal = (timestamp) => {
+  if (!timestamp) return '';
+  const date = new Date(timestamp);
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+};
+
+const fromDatetimeLocal = (str) => {
+  if (!str) return null;
+  return new Date(str).getTime();
+};
+
+const EditSessionModal = ({ session, onClose, onSave }) => {
+  const [headOut, setHeadOut] = useState(toDatetimeLocal(session.deliveryStartTime));
+  const [bodyOut, setBodyOut] = useState(session.bodyOutTimes?.[0] ? toDatetimeLocal(session.bodyOutTimes[0]) : '');
+
+  const handleSubmit = () => {
+    const updatedSession = {
+      ...session,
+      deliveryStartTime: fromDatetimeLocal(headOut) || session.deliveryStartTime,
+      bodyOutTimes: bodyOut ? [fromDatetimeLocal(bodyOut)] : []
+    };
+    onSave(updatedSession);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-6 sm:p-8 max-w-sm w-full shadow-2xl relative overflow-hidden border border-slate-100 dark:border-slate-800">
+        <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-2">
+          <Clock className="text-indigo-500" /> Edit Times
+        </h3>
+
+        <div className="space-y-5 mb-8">
+          <div>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Head Out Time</label>
+            <input
+              type="datetime-local"
+              value={headOut}
+              onChange={(e) => setHeadOut(e.target.value)}
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-slate-800 dark:text-slate-100 font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Body Out Time (Optional)</label>
+            <input
+              type="datetime-local"
+              value={bodyOut}
+              onChange={(e) => setBodyOut(e.target.value)}
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-slate-800 dark:text-slate-100 font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 w-full">
+          <button onClick={handleSubmit} className="w-full py-4 rounded-2xl bg-indigo-500 hover:bg-indigo-600 text-white font-black text-lg shadow-lg shadow-indigo-500/30 transition-all active:scale-95 touch-manipulation">
+            Save Changes
+          </button>
+          <button onClick={onClose} className="w-full py-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-all">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, deleteSingleSession, setModalState, onEditScore, onFullEdit }) => {
   const [expanded, setExpanded] = useState(false);
 
   const dateObj = new Date(session.deliveryStartTime);
@@ -108,9 +174,14 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
       {/* Header Row */}
       <div className="flex justify-between items-center mb-6">
         <div className="font-black text-2xl text-slate-800 dark:text-slate-100">{dateFormatted}</div>
-        <button onClick={handleDelete} className="p-2.5 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 dark:bg-slate-900/50 dark:hover:bg-rose-900/50 rounded-xl transition-colors border border-slate-100 dark:border-slate-700" title="Delete Session">
-          <Trash2 size={18} />
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => onFullEdit(session, index, isOffline)} className="p-2.5 bg-slate-50 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 dark:bg-slate-900/50 dark:hover:bg-indigo-900/50 rounded-xl transition-colors border border-slate-100 dark:border-slate-700" title="Edit Times">
+            <Edit2 size={18} />
+          </button>
+          <button onClick={handleDelete} className="p-2.5 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 dark:bg-slate-900/50 dark:hover:bg-rose-900/50 rounded-xl transition-colors border border-slate-100 dark:border-slate-700" title="Delete Session">
+            <Trash2 size={18} />
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4 border-b border-slate-100 dark:border-slate-700/50 pb-6">
@@ -171,6 +242,7 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
 };
 
 export const HistoryTab = () => {
+  const { syncError } = useAppContext();
   const cloudSessions = useQuery(api.sessions.getSessions) || [];
   const deleteAllSessions = useMutation(api.sessions.deleteAllSessions);
   const deleteSingleSession = api.sessions.deleteSession ? useMutation(api.sessions.deleteSession) : null;
@@ -178,8 +250,9 @@ export const HistoryTab = () => {
 
   const [modalState, setModalState] = useState({ isOpen: false, type: '', title: '', message: '', onConfirm: null });
 
-  // Inline Editing State
-  const [editModal, setEditModal] = useState({ isOpen: false, interval: null, session: null, index: null, isOffline: false });
+  // Modals for editing history
+  const [editApgarModal, setEditApgarModal] = useState({ isOpen: false, interval: null, session: null, index: null, isOffline: false });
+  const [fullEditModal, setFullEditModal] = useState({ isOpen: false, session: null, index: null, isOffline: false });
 
   const queueStr = localStorage.getItem('offlineQueue');
   const offlineSessions = queueStr ? JSON.parse(queueStr) : [];
@@ -206,27 +279,53 @@ export const HistoryTab = () => {
     setModalState({ isOpen: false });
   };
 
-  const openHistoricalEdit = (interval, session, index, isOffline) => {
-    setEditModal({ isOpen: true, interval, session, index, isOffline });
+  const openHistoricalApgarEdit = (interval, session, index, isOffline) => {
+    setEditApgarModal({ isOpen: true, interval, session, index, isOffline });
   };
 
-  const handleHistoricalSave = async (interval, scoreData) => {
-    if (editModal.isOffline) {
-      // Update local queue
+  const openFullEdit = (session, index, isOffline) => {
+    setFullEditModal({ isOpen: true, session, index, isOffline });
+  };
+
+  const handleHistoricalApgarSave = async (interval, scoreData) => {
+    if (editApgarModal.isOffline) {
       const newQueue = [...localQueue];
-      const sessionToUpdate = newQueue[editModal.index];
+      const sessionToUpdate = newQueue[editApgarModal.index];
       if (interval === 1) sessionToUpdate.apgar1MinParams = scoreData;
       else sessionToUpdate.apgar5MinParams = scoreData;
       localStorage.setItem('offlineQueue', JSON.stringify(newQueue));
       setLocalQueue(newQueue);
     } else {
-      // Update cloud DB
-      if (updateSessionToCloud && editModal.session._id) {
-        await updateSessionToCloud({ id: editModal.session._id, interval, data: scoreData });
+      if (updateSessionToCloud && editApgarModal.session._id) {
+        const payload = { id: editApgarModal.session._id };
+        if (interval === 1) payload.apgar1MinParams = scoreData;
+        else payload.apgar5MinParams = scoreData;
+        await updateSessionToCloud(payload);
       }
     }
-    setEditModal({ isOpen: false });
+    setEditApgarModal({ isOpen: false });
   };
+
+  const handleFullEditSave = async (updatedSession) => {
+    if (fullEditModal.isOffline) {
+      const newQueue = [...localQueue];
+      newQueue[fullEditModal.index] = updatedSession;
+      localStorage.setItem('offlineQueue', JSON.stringify(newQueue));
+      setLocalQueue(newQueue);
+    } else {
+      if (updateSessionToCloud && updatedSession._id) {
+        await updateSessionToCloud({
+          id: updatedSession._id,
+          deliveryStartTime: updatedSession.deliveryStartTime,
+          bodyOutTimes: updatedSession.bodyOutTimes
+        });
+      }
+    }
+    setFullEditModal({ isOpen: false });
+  };
+
+  // Determine Sync Status
+  const isSyncing = localQueue.length > 0;
 
   return (
     <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 pb-32">
@@ -236,9 +335,18 @@ export const HistoryTab = () => {
           History
         </h2>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full">
-            <Cloud size={14} className="text-emerald-500" /> Synced
-          </div>
+
+          {/* Dynamic Sync Badge */}
+          {isSyncing ? (
+            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400 px-3 py-1.5 rounded-full border border-amber-200 dark:border-amber-800/50">
+              <RefreshCw size={14} className="animate-spin" /> Syncing...
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-transparent">
+              <Cloud size={14} className="text-emerald-500" /> Synced
+            </div>
+          )}
+
           {(cloudSessions.length > 0 || localQueue.length > 0) && (
             <button
               onClick={handleDeleteAll}
@@ -249,6 +357,17 @@ export const HistoryTab = () => {
           )}
         </div>
       </div>
+
+      {/* Database Error Debugger Readout */}
+      {isSyncing && syncError && (
+        <div className="mb-8 p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/50 rounded-2xl flex items-start gap-3">
+          <AlertCircle className="text-rose-500 shrink-0 mt-0.5" size={20} />
+          <div>
+            <h4 className="text-rose-700 dark:text-rose-400 font-bold text-sm mb-1">Database Sync Error</h4>
+            <p className="text-rose-600/80 dark:text-rose-400/80 text-xs font-mono">{syncError}</p>
+          </div>
+        </div>
+      )}
 
       {modalState.isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm">
@@ -288,13 +407,22 @@ export const HistoryTab = () => {
         </div>
       )}
 
-      {/* Render the decoupled Apgar Modal for editing historical data */}
-      {editModal.isOpen && (
+      {/* Full Session Editor Modal */}
+      {fullEditModal.isOpen && (
+        <EditSessionModal
+          session={fullEditModal.session}
+          onClose={() => setFullEditModal({ isOpen: false })}
+          onSave={handleFullEditSave}
+        />
+      )}
+
+      {/* APGAR Specific Inline Editor */}
+      {editApgarModal.isOpen && (
         <ApgarModal
-          interval={editModal.interval}
-          historicalSession={editModal.session}
-          onHistoricalSave={handleHistoricalSave}
-          onClose={() => setEditModal({ isOpen: false })}
+          interval={editApgarModal.interval}
+          historicalSession={editApgarModal.session}
+          onHistoricalSave={handleHistoricalApgarSave}
+          onClose={() => setEditApgarModal({ isOpen: false })}
         />
       )}
 
@@ -310,7 +438,8 @@ export const HistoryTab = () => {
               setLocalQueue={setLocalQueue}
               deleteSingleSession={deleteSingleSession}
               setModalState={setModalState}
-              onEditScore={openHistoricalEdit}
+              onEditScore={openHistoricalApgarEdit}
+              onFullEdit={openFullEdit}
             />
           ))}
         </div>
@@ -333,7 +462,8 @@ export const HistoryTab = () => {
               setLocalQueue={setLocalQueue}
               deleteSingleSession={deleteSingleSession}
               setModalState={setModalState}
-              onEditScore={openHistoricalEdit}
+              onEditScore={openHistoricalApgarEdit}
+              onFullEdit={openFullEdit}
             />
           ))}
         </div>

@@ -3,24 +3,36 @@ import { useRef, useCallback } from 'react';
 export function useAudio() {
   const audioCtxRef = useRef(null);
 
-  const playChime = useCallback(() => {
+  // CRITICAL: This must be fired during a direct user click to bypass iOS/Android auto-play policies
+  const initAudio = useCallback(() => {
     if (!audioCtxRef.current) {
       audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
     }
+    if (audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume();
+    }
+    if ('speechSynthesis' in window) {
+      // Trigger a silent utterance to unlock speech synth
+      const utterance = new SpeechSynthesisUtterance('');
+      utterance.volume = 0;
+      window.speechSynthesis.speak(utterance);
+    }
+  }, []);
+
+  const playChime = useCallback(() => {
+    if (!audioCtxRef.current) return;
     const ctx = audioCtxRef.current;
     if (ctx.state === 'suspended') ctx.resume();
 
-    // A soothing major chord (C5, E5, G5) instead of a harsh sweep
-    const frequencies = [523.25, 659.25, 783.99];
+    const frequencies = [523.25, 659.25, 783.99]; // C Major chord
 
     frequencies.forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const gainNode = ctx.createGain();
 
-      osc.type = 'sine'; // Softest waveform
+      osc.type = 'sine';
       osc.frequency.value = freq;
 
-      // Slow attack, long soothing release
       gainNode.gain.setValueAtTime(0, ctx.currentTime);
       gainNode.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.1 + (i * 0.05));
       gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5 + (i * 0.2));
@@ -33,21 +45,19 @@ export function useAudio() {
     });
   }, []);
 
-  const speakTime = useCallback((seconds) => {
+  const speakTime = useCallback((seconds, customText = null) => {
     if (!('speechSynthesis' in window)) return;
 
-    let text = '';
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+    let text = customText;
 
-    if (mins > 0) {
-      text += `${mins} minute${mins > 1 ? 's' : ''} `;
+    if (!text) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      text = '';
+      if (mins > 0) text += `${mins} minute${mins > 1 ? 's' : ''} `;
+      if (secs > 0) text += `${secs} seconds`;
+      if (text === '') text = 'Started';
     }
-    if (secs > 0) {
-      text += `${secs} seconds`;
-    }
-
-    if (text === '') text = 'Started';
 
     // Cancel any ongoing speech
     window.speechSynthesis.cancel();
@@ -58,5 +68,5 @@ export function useAudio() {
     window.speechSynthesis.speak(utterance);
   }, []);
 
-  return { playChime, speakTime };
+  return { initAudio, playChime, speakTime };
 }

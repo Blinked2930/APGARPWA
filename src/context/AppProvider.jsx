@@ -31,14 +31,14 @@ export const AppProvider = ({ children }) => {
   });
 
   const [audioMode, setAudioMode] = useState(() => {
-    return localStorage.getItem('audioMode') || 'VOICE'; // Default to VOICE
+    return localStorage.getItem('audioMode') || 'VOICE';
   });
 
   const [manualModal, setManualModal] = useState(null);
 
-  const { playChime, speakTime } = useAudio();
+  const { initAudio, playChime, speakTime } = useAudio();
   const { requestWakeLock, releaseWakeLock } = useWakeLock();
-  const { queueSession } = useOfflineSync();
+  const { queueSession, syncError } = useOfflineSync(); // Bring in syncError
 
   useEffect(() => {
     localStorage.setItem('audioMode', audioMode);
@@ -77,6 +77,9 @@ export const AppProvider = ({ children }) => {
   };
 
   const startDelivery = () => {
+    // CRITICAL: Unlock the audio context during this explicit user click!
+    initAudio();
+
     if (!deliveryStartTime) {
       setDeliveryStartTime(Date.now());
       setRecordedTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
@@ -112,8 +115,6 @@ export const AppProvider = ({ children }) => {
       setApgar1MinParams(scoreData);
     } else if (interval === 5) {
       setApgar5MinParams(scoreData);
-
-      // Always queue for backup to history when the 5-min is interacted with, even if just "In Progress"
       queueSession({
         recordedTimeZone,
         deliveryStartTime,
@@ -153,7 +154,8 @@ export const AppProvider = ({ children }) => {
       manualModal,
       openApgarModal,
       closeManualModal,
-      loadSessionForEdit
+      loadSessionForEdit,
+      syncError // Expose to HistoryTab
     }}>
       {children}
     </AppContext.Provider>

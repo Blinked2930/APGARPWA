@@ -24,9 +24,10 @@ const StatusBadge = ({ interval, params, openApgarModal }) => {
 };
 
 export const ApgarTimer = () => {
-    const { bodyOutTimes, apgar1MinParams, apgar5MinParams, openApgarModal } = useAppContext();
+    const { bodyOutTimes, apgar1MinParams, apgar5MinParams, openApgarModal, audioMode, playChime, speakTime } = useAppContext();
     const [elapsed, setElapsed] = useState(0);
-    const rafRef = useRef(null);
+    const announced1Min = useRef(false);
+    const announced5Min = useRef(false);
 
     useEffect(() => {
         if (bodyOutTimes.length === 0) {
@@ -36,28 +37,37 @@ export const ApgarTimer = () => {
 
         const firstBodyOut = bodyOutTimes[0];
 
-        const tick = () => {
-            setElapsed(Date.now() - firstBodyOut);
-            rafRef.current = requestAnimationFrame(tick);
-        };
+        const intervalId = setInterval(() => {
+            const diff = Date.now() - firstBodyOut;
+            setElapsed(diff);
 
-        rafRef.current = requestAnimationFrame(tick);
-        return () => {
-            if (rafRef.current) cancelAnimationFrame(rafRef.current);
-        };
-    }, [bodyOutTimes]);
+            // Audio Announcements for exactly 1 min and 5 min marks
+            if (diff >= 60000 && !announced1Min.current) {
+                announced1Min.current = true;
+                if (audioMode === 'VOICE') speakTime(0, "One minute APGAR");
+                else if (audioMode === 'CHIME') playChime();
+            }
+
+            if (diff >= 300000 && !announced5Min.current) {
+                announced5Min.current = true;
+                if (audioMode === 'VOICE') speakTime(0, "Five minute APGAR");
+                else if (audioMode === 'CHIME') playChime();
+            }
+
+        }, 250);
+
+        return () => clearInterval(intervalId);
+    }, [bodyOutTimes.length, audioMode, playChime, speakTime]);
 
     if (bodyOutTimes.length === 0) return null;
 
     // 1 Min tracker
     const target1 = 5 * 1000;
     const progress1 = Math.min((elapsed / target1) * 100, 100);
-    const is1MinStarted = !!apgar1MinParams;
 
     // 5 Min tracker
     const target5 = 15 * 1000;
     const progress5 = Math.min((elapsed / target5) * 100, 100);
-    const is5MinStarted = !!apgar5MinParams;
 
     const formatStatus = (targetMs, currentMs, params) => {
         if (!params) {
