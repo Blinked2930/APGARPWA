@@ -6,36 +6,42 @@ export const Stopwatch = () => {
   const { deliveryStartTime, bodyOutTimes, apgar5MinParams, audioMode, playChime, speakTime, startDelivery, stopDelivery } = useAppContext();
   const [elapsed, setElapsed] = useState(0);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const lastMilestoneRef = useRef(0);
+
+  // Remembers which 30s blocks we've spoken, preventing double-talk when React re-renders
+  const announcedBlocks = useRef(new Set());
 
   useEffect(() => {
     if (!deliveryStartTime) {
+      announcedBlocks.current.clear();
       setElapsed(0);
-      lastMilestoneRef.current = 0;
       return;
     }
 
-    // Swapped to setInterval because requestAnimationFrame pauses entirely when screen dims
     const interval = setInterval(() => {
-      const now = apgar5MinParams ? apgar5MinParams.timeCompleted : Date.now();
-      const diff = now - deliveryStartTime;
+      const diff = Date.now() - deliveryStartTime;
       setElapsed(diff);
 
-      if (apgar5MinParams) return;
+      // Stop this specific background tracker if Body Out is pressed
+      if (bodyOutTimes.length > 0 || apgar5MinParams) return;
 
-      // Head Out specific logic (only run before Body Out is marked)
-      if (bodyOutTimes.length === 0) {
-        const current30sBlock = Math.floor(diff / 30000);
-        if (current30sBlock > 0 && current30sBlock > lastMilestoneRef.current) {
-          lastMilestoneRef.current = current30sBlock;
-          const announceSeconds = current30sBlock * 30;
+      const currentBlock = Math.floor(diff / 30000); // 30-second blocks
+      const remainder = diff % 30000;
 
-          if (audioMode === 'VOICE') speakTime(announceSeconds);
-          else if (audioMode === 'CHIME') playChime();
-        }
+      // Phase 1 Gate: Are we in a new block, within the 1-second strike zone?
+      if (currentBlock > 0 && remainder < 1000 && !announcedBlocks.current.has(currentBlock)) {
+          announcedBlocks.current.add(currentBlock);
+          
+          // The Master Gate: Audio Mode
+          if (audioMode === 'VOICE') {
+              speakTime(currentBlock * 30); // Formats to "30 seconds", "1 minute", etc.
+          } else if (audioMode === 'CHIME') {
+              playChime();
+          }
+          // If MUTE, bypasses completely.
       }
-    }, 250); // Checking 4 times a second is highly resilient
+    }, 250); 
 
+    // Re-evaluates instantly if audioMode changes
     return () => clearInterval(interval);
   }, [deliveryStartTime, apgar5MinParams, bodyOutTimes.length, audioMode, playChime, speakTime]);
 

@@ -5,6 +5,13 @@ import { useOfflineSync } from '../hooks/useOfflineSync';
 
 const AppContext = createContext();
 
+// CENTRALIZED CONFIGURATION: The Single Source of Truth
+// Change to 60000 (1 min) and 300000 (5 mins) for production!
+const APGAR_CONFIG = {
+  INTERVAL_1: 5000,   // 5 seconds for testing
+  INTERVAL_2: 15000,  // 15 seconds for testing
+};
+
 export const AppProvider = ({ children }) => {
   const [deliveryStartTime, setDeliveryStartTime] = useState(() => {
     const saved = localStorage.getItem('deliveryStartTime');
@@ -38,7 +45,7 @@ export const AppProvider = ({ children }) => {
 
   const { initAudio, playChime, speakTime } = useAudio();
   const { requestWakeLock, releaseWakeLock } = useWakeLock();
-  const { queueSession, syncError } = useOfflineSync(); // Bring in syncError
+  const { queueSession, syncError } = useOfflineSync();
 
   useEffect(() => {
     localStorage.setItem('audioMode', audioMode);
@@ -57,18 +64,22 @@ export const AppProvider = ({ children }) => {
   }, [deliveryStartTime, recordedTimeZone, requestWakeLock, releaseWakeLock]);
 
   useEffect(() => {
-    localStorage.setItem('bodyOutTimes', JSON.stringify(bodyOutTimes));
+    if (bodyOutTimes.length > 0) localStorage.setItem('bodyOutTimes', JSON.stringify(bodyOutTimes));
+    else localStorage.removeItem('bodyOutTimes');
   }, [bodyOutTimes]);
 
   useEffect(() => {
-    localStorage.setItem('apgar1MinParams', JSON.stringify(apgar1MinParams));
+    if (apgar1MinParams) localStorage.setItem('apgar1MinParams', JSON.stringify(apgar1MinParams));
+    else localStorage.removeItem('apgar1MinParams');
   }, [apgar1MinParams]);
 
   useEffect(() => {
-    localStorage.setItem('apgar5MinParams', JSON.stringify(apgar5MinParams));
+    if (apgar5MinParams) localStorage.setItem('apgar5MinParams', JSON.stringify(apgar5MinParams));
+    else localStorage.removeItem('apgar5MinParams');
   }, [apgar5MinParams]);
 
   const toggleAudioMode = () => {
+    initAudio(); // Unlock audio on toggle
     setAudioMode(prev => {
       if (prev === 'MUTE') return 'VOICE';
       if (prev === 'VOICE') return 'CHIME';
@@ -77,9 +88,7 @@ export const AppProvider = ({ children }) => {
   };
 
   const startDelivery = () => {
-    // CRITICAL: Unlock the audio context during this explicit user click!
     initAudio();
-
     if (!deliveryStartTime) {
       setDeliveryStartTime(Date.now());
       setRecordedTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
@@ -92,6 +101,7 @@ export const AppProvider = ({ children }) => {
     setBodyOutTimes([]);
     setApgar1MinParams(null);
     setApgar5MinParams(null);
+
     localStorage.removeItem('deliveryStartTime');
     localStorage.removeItem('recordedTimeZone');
     localStorage.removeItem('bodyOutTimes');
@@ -125,19 +135,12 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const loadSessionForEdit = (session) => {
-    setDeliveryStartTime(session.deliveryStartTime);
-    setRecordedTimeZone(session.recordedTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone);
-    setBodyOutTimes(session.bodyOutTimes || []);
-    setApgar1MinParams(session.apgar1MinParams || null);
-    setApgar5MinParams(session.apgar5MinParams || null);
-  };
-
   const openApgarModal = (interval) => setManualModal(interval);
   const closeManualModal = () => setManualModal(null);
 
   return (
     <AppContext.Provider value={{
+      APGAR_CONFIG, // Exporting the central config!
       recordedTimeZone,
       deliveryStartTime,
       bodyOutTimes,
@@ -154,8 +157,7 @@ export const AppProvider = ({ children }) => {
       manualModal,
       openApgarModal,
       closeManualModal,
-      loadSessionForEdit,
-      syncError // Expose to HistoryTab
+      syncError
     }}>
       {children}
     </AppContext.Provider>
