@@ -16,7 +16,8 @@ const MainTimerView = () => {
   const isBirthFinished = !!apgar5MinParams;
 
   return (
-    <div className="w-full max-w-2xl flex flex-col items-center gap-4 sm:gap-6 pb-24 px-4 sm:px-6">
+    // Added flex-1 and justify-center to vertically center the active timer screen!
+    <div className="w-full max-w-2xl flex flex-col items-center justify-center flex-1 gap-4 sm:gap-6 px-4 sm:px-6">
 
       <Stopwatch />
 
@@ -45,7 +46,9 @@ const AppContent = () => {
   const [activeTab, setActiveTab] = useState('timer'); // 'timer' or 'history'
 
   return (
-    <div className="min-h-screen text-slate-900 dark:text-slate-100 font-sans flex flex-col items-center selection:bg-transparent transition-colors pt-4 sm:pt-6 bg-slate-50 dark:bg-slate-950 overflow-y-auto pb-[100px] relative">
+    // Changed min-h-screen to min-h-[100dvh] for mobile perfection.
+    // Added safe-area-insets to push below the notch and above the home bar.
+    <div className="min-h-[100dvh] text-slate-900 dark:text-slate-100 font-sans flex flex-col items-center selection:bg-transparent transition-colors bg-slate-50 dark:bg-slate-950 overflow-y-auto relative pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(80px+env(safe-area-inset-bottom))]">
 
       {/* Decorative ambient background glows */}
       <div className="fixed top-0 inset-x-0 h-48 sm:h-64 bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] pointer-events-none"></div>
@@ -53,7 +56,7 @@ const AppContent = () => {
       {activeTab === 'timer' ? <MainTimerView /> : <HistoryTab />}
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 inset-x-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-2xl border-t border-slate-200/50 dark:border-white/5 p-4 pb-safe flex justify-center gap-4 z-40">
+      <div className="fixed bottom-0 inset-x-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-2xl border-t border-slate-200/50 dark:border-white/5 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] flex justify-center gap-4 z-40">
         <button
           onClick={() => setActiveTab('timer')}
           className={`flex-1 max-w-[200px] flex flex-col items-center justify-center p-3 rounded-2xl font-bold transition-all active:scale-95 touch-manipulation gap-1 ${activeTab === 'timer' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}
