@@ -24,7 +24,6 @@ const StatusBadge = ({ interval, params, openApgarModal }) => {
 };
 
 export const ApgarTimer = () => {
-    // Pulls in APGAR_CONFIG as the central source of truth
     const { bodyOutTimes, apgar1MinParams, apgar5MinParams, openApgarModal, audioMode, playChime, speakTime, APGAR_CONFIG } = useAppContext();
     const [elapsed, setElapsed] = useState(0);
 
@@ -39,32 +38,28 @@ export const ApgarTimer = () => {
 
         const firstBodyOut = bodyOutTimes[0];
         
-        // Dynamic Voice Formatter (Changes "5 second APGAR" to "1 minute APGAR" based on config)
         const getVoiceText = (ms) => {
-            if (ms >= 60000) return `${Math.floor(ms / 60000)} minute APGAR`;
-            return `${Math.floor(ms / 1000)} second APGAR`;
+            if (ms >= 60000) {
+                const mins = Math.floor(ms / 60000);
+                return `${mins} minute Apgar`;
+            }
+            return `${Math.floor(ms / 1000)} second Apgar`;
         };
         
         const intervalId = setInterval(() => {
             const diff = Date.now() - firstBodyOut;
             setElapsed(diff);
 
-            // STRIKE ZONE LOGIC (Reads directly from APGAR_CONFIG)
-            
-            // Interval 1
+            // Interval 1 (Production: 1 min)
             if (diff >= APGAR_CONFIG.INTERVAL_1 && diff < APGAR_CONFIG.INTERVAL_1 + 1000 && !announcedMilestones.current.has(1)) {
                 announcedMilestones.current.add(1);
-                
-                // The Master Gate: Audio Mode
                 if (audioMode === 'VOICE') speakTime(0, getVoiceText(APGAR_CONFIG.INTERVAL_1));
                 else if (audioMode === 'CHIME') playChime();
             }
 
-            // Interval 2
+            // Interval 2 (Production: 5 min)
             if (diff >= APGAR_CONFIG.INTERVAL_2 && diff < APGAR_CONFIG.INTERVAL_2 + 1000 && !announcedMilestones.current.has(5)) {
                 announcedMilestones.current.add(5);
-                
-                // The Master Gate: Audio Mode
                 if (audioMode === 'VOICE') speakTime(0, getVoiceText(APGAR_CONFIG.INTERVAL_2));
                 else if (audioMode === 'CHIME') playChime();
             }
@@ -76,7 +71,6 @@ export const ApgarTimer = () => {
 
     if (bodyOutTimes.length === 0) return null;
 
-    // Visuals perfectly adapt to APGAR_CONFIG
     const progress1 = Math.min((elapsed / APGAR_CONFIG.INTERVAL_1) * 100, 100);
     const progress5 = Math.min((elapsed / APGAR_CONFIG.INTERVAL_2) * 100, 100);
 
@@ -113,7 +107,7 @@ export const ApgarTimer = () => {
             
             <h3 className="text-lg font-black flex items-center gap-2 text-slate-800 dark:text-slate-100 uppercase tracking-widest relative z-10">
                 <Clock className="text-indigo-500" strokeWidth={3} size={20} /> 
-                APGAR
+                Apgar
             </h3>
             
             <div className="space-y-6 relative z-10">

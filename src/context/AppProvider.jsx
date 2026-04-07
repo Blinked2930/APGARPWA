@@ -5,11 +5,10 @@ import { useOfflineSync } from '../hooks/useOfflineSync';
 
 const AppContext = createContext();
 
-// CENTRALIZED CONFIGURATION: The Single Source of Truth
-// Change to 60000 (1 min) and 300000 (5 mins) for production!
+// CENTRALIZED CONFIGURATION: Production Timing
 const APGAR_CONFIG = {
-  INTERVAL_1: 5000,   // 5 seconds for testing
-  INTERVAL_2: 15000,  // 15 seconds for testing
+  INTERVAL_1: 60000,   // 1 minute (60,000ms)
+  INTERVAL_2: 300000,  // 5 minutes (300,000ms)
 };
 
 export const AppProvider = ({ children }) => {
@@ -79,7 +78,7 @@ export const AppProvider = ({ children }) => {
   }, [apgar5MinParams]);
 
   const toggleAudioMode = () => {
-    initAudio(); // Unlock audio on toggle
+    initAudio();
     setAudioMode(prev => {
       if (prev === 'MUTE') return 'VOICE';
       if (prev === 'VOICE') return 'CHIME';
@@ -140,7 +139,7 @@ export const AppProvider = ({ children }) => {
 
   return (
     <AppContext.Provider value={{
-      APGAR_CONFIG, // Exporting the central config!
+      APGAR_CONFIG,
       recordedTimeZone,
       deliveryStartTime,
       bodyOutTimes,
