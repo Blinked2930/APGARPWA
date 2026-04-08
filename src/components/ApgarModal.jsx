@@ -3,17 +3,16 @@ import { useAppContext } from '../context/AppProvider';
 import { Palette, HeartPulse, SmilePlus, Activity, Wind, CheckCircle2 } from 'lucide-react';
 
 const CATEGORIES = [
-  { id: 'appearance', label: 'Color', icon: <Palette className="text-indigo-400 w-5 h-5 sm:w-6 sm:h-6" /> },
-  { id: 'pulse', label: 'Heart Rate', icon: <HeartPulse className="text-indigo-400 w-5 h-5 sm:w-6 sm:h-6" /> },
-  { id: 'grimace', label: 'Reflex', icon: <SmilePlus className="text-indigo-400 w-5 h-5 sm:w-6 sm:h-6" /> },
-  { id: 'activity', label: 'Muscle Tone', icon: <Activity className="text-indigo-400 w-5 h-5 sm:w-6 sm:h-6" /> },
-  { id: 'respiration', label: 'Breathing', icon: <Wind className="text-indigo-400 w-5 h-5 sm:w-6 sm:h-6" /> }
+  { id: 'appearance', label: 'Color', icon: <Palette className="text-indigo-400 w-4 h-4 sm:w-5 sm:h-5" /> },
+  { id: 'pulse', label: 'Heart Rate', icon: <HeartPulse className="text-indigo-400 w-4 h-4 sm:w-5 sm:h-5" /> },
+  { id: 'grimace', label: 'Reflex', icon: <SmilePlus className="text-indigo-400 w-4 h-4 sm:w-5 sm:h-5" /> },
+  { id: 'activity', label: 'Muscle Tone', icon: <Activity className="text-indigo-400 w-4 h-4 sm:w-5 sm:h-5" /> },
+  { id: 'respiration', label: 'Breathing', icon: <Wind className="text-indigo-400 w-4 h-4 sm:w-5 sm:h-5" /> }
 ];
 
 export const ApgarModal = ({ interval, onClose, historicalSession, onHistoricalSave }) => {
   const { saveApgarScore, apgar1MinParams, apgar5MinParams } = useAppContext();
 
-  // Load existing scores dynamically based on whether we are editing history or the active timer
   const existingParams = historicalSession
     ? (interval === 1 ? historicalSession.apgar1MinParams : historicalSession.apgar5MinParams)
     : (interval === 1 ? apgar1MinParams : apgar5MinParams);
@@ -24,7 +23,7 @@ export const ApgarModal = ({ interval, onClose, historicalSession, onHistoricalS
   const [canClose, setCanClose] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setCanClose(true), 300);
+    const timer = setTimeout(() => setCanClose(true), 200);
     return () => clearTimeout(timer);
   }, []);
 
@@ -49,7 +48,6 @@ export const ApgarModal = ({ interval, onClose, historicalSession, onHistoricalS
       scorePayload = { skipped: true, timeCompleted: Date.now(), inProgress: false };
     }
 
-    // Direct traffic: If this is an old session, send it to the history handler. Otherwise, use the active handler.
     if (onHistoricalSave) {
       onHistoricalSave(interval, scorePayload);
     } else {
@@ -66,53 +64,52 @@ export const ApgarModal = ({ interval, onClose, historicalSession, onHistoricalS
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex flex-col justify-end p-2 sm:p-4 bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-[4px] transition-all"
+      className="fixed inset-0 z-[100] flex flex-col justify-center items-center p-2 sm:p-4 bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-[4px] transition-all"
       onClick={handleBackdropClick}
     >
+      {/* FIX: Massively compressed padding, margins, and max-height */}
       <div
-        className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl shadow-indigo-500/10 w-full max-w-2xl mx-auto p-4 sm:p-8 border border-white/50 dark:border-slate-700 pointer-events-auto overflow-y-auto max-h-[90vh] sm:max-h-[85vh] mb-safe"
+        className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[1.5rem] shadow-2xl shadow-indigo-500/10 w-full max-w-xl mx-auto p-3 sm:p-5 border border-white/50 dark:border-slate-700 pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-12 sm:w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-4 sm:mb-6"></div>
-
-        <div className="flex justify-between items-center mb-4 sm:mb-5 pb-2 sm:pb-3">
-          <div className="w-10 sm:w-12"></div>
-          <h2 className="text-2xl sm:text-3xl font-black text-center text-slate-800 dark:text-white flex items-center justify-center gap-2 sm:gap-3 m-0">
-            <span className="bg-indigo-100 text-indigo-600 dark:bg-indigo-900 absolute opacity-0"></span>
-            <div className="h-10 w-10 sm:h-14 sm:w-14 text-lg sm:text-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center rounded-xl sm:rounded-2xl shadow-inner border border-indigo-100 dark:border-indigo-500/20">
+        <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-100 dark:border-slate-800/50">
+          <div className="w-8"></div>
+          <h2 className="text-xl sm:text-2xl font-black text-center text-slate-800 dark:text-white flex items-center justify-center gap-2 m-0">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 text-base sm:text-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center rounded-lg shadow-inner border border-indigo-100 dark:border-indigo-500/20">
               {interval}
             </div>
             Min APGAR
           </h2>
           <button
             onClick={() => { if (canClose) handleSubmit(); }}
-            className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all font-bold text-[10px] sm:text-xs uppercase tracking-tighter"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all font-bold text-[9px] uppercase tracking-tighter"
           >
-            Close
+            ✕
           </button>
         </div>
 
-        <div className="space-y-2.5 sm:space-y-4 mb-6 sm:mb-8">
+        <div className="space-y-1.5 sm:space-y-2 mb-4">
           {CATEGORIES.map(cat => (
-            <div key={cat.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 p-3 sm:p-4 rounded-[1.5rem] sm:rounded-[2rem]">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="bg-white dark:bg-slate-800 p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+            // FIX: Forced horizontal row layout so it never stacks vertically on small screens
+            <div key={cat.id} className="flex flex-row items-center justify-between gap-2 bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl">
+              <div className="flex items-center gap-2">
+                <div className="bg-white dark:bg-slate-800 p-1.5 sm:p-2 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700">
                   {cat.icon}
                 </div>
-                <span className="text-base sm:text-xl font-bold text-slate-700 dark:text-slate-300">
+                <span className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 w-16 sm:w-24 leading-tight">
                   {cat.label}
                 </span>
               </div>
-              <div className="flex justify-between gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="flex gap-1.5 sm:gap-2 w-[55%] sm:w-[60%]">
                 {[0, 1, 2].map(val => {
                   const isSelected = scores[cat.id] === val;
                   return (
                     <button
                       key={val}
                       onClick={(e) => { e.stopPropagation(); handleScore(cat.id, val); }}
-                      className={`h-12 sm:h-16 flex-1 sm:w-24 text-xl sm:text-3xl font-black rounded-xl sm:rounded-[1.5rem] transition-all active:scale-95 touch-manipulation
+                      className={`h-9 sm:h-10 flex-1 text-base sm:text-lg font-black rounded-lg sm:rounded-xl transition-all active:scale-95 touch-manipulation
                         ${isSelected
-                          ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/30 scale-105 border-transparent'
+                          ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-md shadow-indigo-500/20 scale-[1.02] border-transparent'
                           : 'bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-slate-700'
                         }`}
                     >
@@ -127,14 +124,14 @@ export const ApgarModal = ({ interval, onClose, historicalSession, onHistoricalS
 
         <button
           onClick={handleSubmit}
-          className={`w-full py-4 sm:py-6 rounded-2xl sm:rounded-[2rem] text-lg sm:text-2xl font-black flex items-center justify-center gap-2 sm:gap-3 transition-all active:scale-95 touch-manipulation
+          className={`w-full py-3 sm:py-4 rounded-xl text-sm sm:text-base font-black flex items-center justify-center gap-2 transition-all active:scale-95 touch-manipulation
             ${isComplete
-              ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white shadow-xl shadow-indigo-500/20'
-              : (isStarted ? 'bg-amber-400 hover:bg-amber-500 text-white shadow-md' : 'bg-slate-200 dark:bg-slate-800 text-slate-500')
+              ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white shadow-lg shadow-indigo-500/20'
+              : (isStarted ? 'bg-amber-400 hover:bg-amber-500 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500')
             }`}
         >
           {isComplete ? (
-            <><CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8" /> COMPLETE & SAVE</>
+            <><CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" /> COMPLETE & SAVE</>
           ) : isStarted ? (
             'SAVE IN PROGRESS'
           ) : (

@@ -3,7 +3,7 @@ import { useAppContext } from '../context/AppProvider';
 import { Play, RotateCcw, AlertTriangle } from 'lucide-react';
 
 export const Stopwatch = () => {
-  const { deliveryStartTime, bodyOutTimes, apgar5MinParams, audioMode, playChime, speakTime, startDelivery, stopDelivery } = useAppContext();
+  const { deliveryStartTime, bodyOutTimes, apgar5MinParams, playChime, speakTime, startDelivery, stopDelivery } = useAppContext();
   const [elapsed, setElapsed] = useState(0);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
@@ -18,12 +18,17 @@ export const Stopwatch = () => {
     }
 
     const interval = setInterval(() => {
-      const diff = Date.now() - deliveryStartTime;
-      setElapsed(diff);
+      const now = apgar5MinParams ? apgar5MinParams.timeCompleted : Date.now();
+      
+      // VISUAL FIX: Start counting from Body Out if it has been clicked
+      const visualStartTime = bodyOutTimes.length > 0 ? bodyOutTimes[0] : deliveryStartTime;
+      setElapsed(now - visualStartTime);
 
-      // Stop this specific background tracker if Body Out is pressed
+      // Stop the Head Out background audio tracker if Body Out is pressed
       if (bodyOutTimes.length > 0 || apgar5MinParams) return;
 
+      // Audio Logic (Only runs during Head Out phase)
+      const diff = now - deliveryStartTime;
       const currentBlock = Math.floor(diff / 30000); // 30-second blocks
       const remainder = diff % 30000;
 
@@ -31,19 +36,19 @@ export const Stopwatch = () => {
       if (currentBlock > 0 && remainder < 1000 && !announcedBlocks.current.has(currentBlock)) {
           announcedBlocks.current.add(currentBlock);
           
-          // The Master Gate: Audio Mode
-          if (audioMode === 'VOICE') {
+          // Read directly from physical memory to bypass ANY React ghost bugs
+          const liveMode = localStorage.getItem('audioMode') || 'VOICE';
+          
+          if (liveMode === 'VOICE') {
               speakTime(currentBlock * 30); // Formats to "30 seconds", "1 minute", etc.
-          } else if (audioMode === 'CHIME') {
+          } else if (liveMode === 'CHIME') {
               playChime();
           }
-          // If MUTE, bypasses completely.
       }
     }, 250); 
 
-    // Re-evaluates instantly if audioMode changes
     return () => clearInterval(interval);
-  }, [deliveryStartTime, apgar5MinParams, bodyOutTimes.length, audioMode, playChime, speakTime]);
+  }, [deliveryStartTime, apgar5MinParams, bodyOutTimes, playChime, speakTime]);
 
   const formatTime = (ms) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -52,6 +57,11 @@ export const Stopwatch = () => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  // Dynamic label so the user knows exactly what the stopwatch is tracking
+  const timerLabel = !deliveryStartTime ? "TOTAL DELIVERY TIME" :
+                     bodyOutTimes.length === 0 ? "TIME SINCE HEAD OUT" : 
+                     "TIME SINCE BODY OUT";
+
   return (
     <div className="flex flex-col items-center justify-center py-2 w-full relative mt-2 sm:mt-4">
       <div className="text-[5.5rem] sm:text-[8rem] font-black tracking-tighter mb-1 leading-none text-slate-800 dark:text-white drop-shadow-sm font-mono origin-center">
@@ -59,7 +69,7 @@ export const Stopwatch = () => {
       </div>
       <div className="text-slate-400 font-bold uppercase tracking-widest text-[10px] sm:text-sm mb-6 flex items-center gap-2">
         <span className="w-6 sm:w-8 h-px bg-slate-200 dark:bg-slate-700"></span>
-        Total Delivery Time
+        {timerLabel}
         <span className="w-6 sm:w-8 h-px bg-slate-200 dark:bg-slate-700"></span>
       </div>
 

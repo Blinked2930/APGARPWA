@@ -16,23 +16,23 @@ const MainTimerView = () => {
   const isBirthFinished = !!apgar5MinParams;
 
   return (
-    // Added flex-1 and justify-center to vertically center the active timer screen!
-    <div className="w-full max-w-2xl flex flex-col items-center justify-center flex-1 gap-4 sm:gap-6 px-4 sm:px-6">
+    // FIX: Using flex-1, h-full, and justify-center to dynamically squeeze into 1 screen
+    <div className="w-full max-w-2xl h-full flex flex-col items-center justify-center gap-2 sm:gap-4 px-2 sm:px-4 mx-auto pb-4">
 
       <Stopwatch />
 
       {!isBirthFinished && (
-        <>
-          <div className="w-full grid grid-cols-4 sm:grid-cols-5 gap-3 sm:gap-4 mt-2">
-            <div className="col-span-1 h-[7rem] sm:h-36">
+        <div className="w-full flex flex-col gap-2 sm:gap-4 mt-2">
+          <div className="w-full grid grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-4">
+            <div className="col-span-1 h-[5rem] sm:h-[6.5rem]">
               <AudioToggle />
             </div>
-            <div className="col-span-3 sm:col-span-4 h-[7rem] sm:h-36">
+            <div className="col-span-3 sm:col-span-4 h-[5rem] sm:h-[6.5rem]">
               <BodyOutButton />
             </div>
           </div>
           {bodyOutTimes.length > 0 && <ApgarTimer />}
-        </>
+        </div>
       )}
 
       {isBirthFinished && <SummaryScreen />}
@@ -43,33 +43,35 @@ const MainTimerView = () => {
 };
 
 const AppContent = () => {
-  const [activeTab, setActiveTab] = useState('timer'); // 'timer' or 'history'
+  const [activeTab, setActiveTab] = useState('timer');
 
   return (
-    // Changed min-h-screen to min-h-[100dvh] for mobile perfection.
-    // Added safe-area-insets to push below the notch and above the home bar.
-    <div className="min-h-[100dvh] text-slate-900 dark:text-slate-100 font-sans flex flex-col items-center selection:bg-transparent transition-colors bg-slate-50 dark:bg-slate-950 overflow-y-auto relative pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(80px+env(safe-area-inset-bottom))]">
+    // FIX: Strict h-[100dvh] and overflow-hidden locks the viewport from scrolling at the root
+    <div className="h-[100dvh] w-full text-slate-900 dark:text-slate-100 font-sans flex flex-col selection:bg-transparent transition-colors bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
 
       {/* Decorative ambient background glows */}
-      <div className="fixed top-0 inset-x-0 h-48 sm:h-64 bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] pointer-events-none"></div>
+      <div className="absolute top-0 inset-x-0 h-48 sm:h-64 bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] pointer-events-none"></div>
 
-      {activeTab === 'timer' ? <MainTimerView /> : <HistoryTab />}
+      {/* Main Content Area (Scrolls ONLY if History Tab is open) */}
+      <div className={`flex-1 w-full flex flex-col pt-[max(env(safe-area-inset-top),1rem)] pb-[85px] ${activeTab === 'history' ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+        {activeTab === 'timer' ? <MainTimerView /> : <HistoryTab />}
+      </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 inset-x-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-2xl border-t border-slate-200/50 dark:border-white/5 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] flex justify-center gap-4 z-40">
+      {/* Bottom Navigation (Fixed absolutely inside the 100dvh container) */}
+      <div className="absolute bottom-0 inset-x-0 h-[80px] bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200/50 dark:border-white/5 p-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] flex justify-center gap-4 z-40">
         <button
           onClick={() => setActiveTab('timer')}
-          className={`flex-1 max-w-[200px] flex flex-col items-center justify-center p-3 rounded-2xl font-bold transition-all active:scale-95 touch-manipulation gap-1 ${activeTab === 'timer' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}
+          className={`flex-1 max-w-[200px] flex flex-col items-center justify-center p-2 rounded-xl font-bold transition-all active:scale-95 touch-manipulation gap-1 ${activeTab === 'timer' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}
         >
-          <Clock size={24} strokeWidth={2.5} />
-          <span className="text-xs uppercase tracking-wider">Active</span>
+          <Clock size={22} strokeWidth={2.5} />
+          <span className="text-[10px] sm:text-xs uppercase tracking-wider">Active</span>
         </button>
         <button
           onClick={() => setActiveTab('history')}
-          className={`flex-1 max-w-[200px] flex flex-col items-center justify-center p-3 rounded-2xl font-bold transition-all active:scale-95 touch-manipulation gap-1 ${activeTab === 'history' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}
+          className={`flex-1 max-w-[200px] flex flex-col items-center justify-center p-2 rounded-xl font-bold transition-all active:scale-95 touch-manipulation gap-1 ${activeTab === 'history' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}
         >
-          <BookCopy size={24} strokeWidth={2.5} />
-          <span className="text-xs uppercase tracking-wider">History</span>
+          <BookCopy size={22} strokeWidth={2.5} />
+          <span className="text-[10px] sm:text-xs uppercase tracking-wider">History</span>
         </button>
       </div>
     </div>

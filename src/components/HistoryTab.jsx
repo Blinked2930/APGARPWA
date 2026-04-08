@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { format } from "date-fns";
-import { CalendarDays, CloudOff, Cloud, CheckCircle2, Trash2, AlertTriangle, Edit2, Info, Clock, RefreshCw, AlertCircle } from "lucide-react";
+import { CalendarDays, CloudOff, Cloud, CheckCircle2, Trash2, AlertTriangle, Edit2, Info, Clock, RefreshCw, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { ApgarModal } from './ApgarModal';
 import { useAppContext } from '../context/AppProvider';
 
@@ -63,7 +63,7 @@ const EditSessionModal = ({ session, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-6 sm:p-8 max-w-sm w-full shadow-2xl relative overflow-hidden border border-slate-100 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 sm:p-8 max-w-sm w-full shadow-2xl relative overflow-hidden border border-slate-100 dark:border-slate-800">
         <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-2">
           <Clock className="text-indigo-500" /> Edit Times
         </h3>
@@ -90,10 +90,10 @@ const EditSessionModal = ({ session, onClose, onSave }) => {
         </div>
 
         <div className="flex flex-col gap-3 w-full">
-          <button onClick={handleSubmit} className="w-full py-4 rounded-2xl bg-indigo-500 hover:bg-indigo-600 text-white font-black text-lg shadow-lg shadow-indigo-500/30 transition-all active:scale-95 touch-manipulation">
+          <button onClick={handleSubmit} className="w-full py-4 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-black text-lg shadow-lg shadow-indigo-500/30 transition-all active:scale-95 touch-manipulation">
             Save Changes
           </button>
-          <button onClick={onClose} className="w-full py-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-all">
+          <button onClick={onClose} className="w-full py-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-all">
             Cancel
           </button>
         </div>
@@ -135,22 +135,33 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
     });
   };
 
+  // FIX: This function now permanently displays the Edit/Add button even if data is missing
   const renderScores = (params, interval) => {
-    if (!params || params.skipped || !params.scores) return null;
-    const s = params.scores;
+    const s = params?.scores;
+    const hasScores = s && !params?.skipped && Object.keys(s).length > 0;
+
     return (
-      <div className="flex flex-col gap-0.5 mt-3 w-full text-[11px] text-slate-600 dark:text-slate-300 bg-white/60 dark:bg-slate-800/80 p-3 rounded-xl shadow-inner border border-slate-100 dark:border-slate-700">
-        <div className="flex justify-between w-full border-b border-slate-100 dark:border-slate-700/50 pb-0.5"><span>Color:</span><span className="font-black">{s.appearance ?? '-'}</span></div>
-        <div className="flex justify-between w-full border-b border-slate-100 dark:border-slate-700/50 pb-0.5"><span>Pulse:</span><span className="font-black">{s.pulse ?? '-'}</span></div>
-        <div className="flex justify-between w-full border-b border-slate-100 dark:border-slate-700/50 pb-0.5"><span>Grimace:</span><span className="font-black">{s.grimace ?? '-'}</span></div>
-        <div className="flex justify-between w-full border-b border-slate-100 dark:border-slate-700/50 pb-0.5"><span>Tone:</span><span className="font-black">{s.activity ?? '-'}</span></div>
-        <div className="flex justify-between w-full pt-0.5 mb-2"><span>Breathing:</span><span className="font-black">{s.respiration ?? '-'}</span></div>
+      <div 
+        className="flex flex-col gap-0.5 mt-3 w-full text-[11px] text-slate-600 dark:text-slate-300 bg-white/60 dark:bg-slate-800/80 p-3 rounded-xl shadow-inner border border-slate-100 dark:border-slate-700 cursor-default" 
+        onClick={(e) => e.stopPropagation()} // Prevents clicks from collapsing the card
+      >
+        {hasScores ? (
+          <>
+            <div className="flex justify-between w-full border-b border-slate-100 dark:border-slate-700/50 pb-0.5"><span>Color:</span><span className="font-black">{s.appearance ?? '-'}</span></div>
+            <div className="flex justify-between w-full border-b border-slate-100 dark:border-slate-700/50 pb-0.5"><span>Pulse:</span><span className="font-black">{s.pulse ?? '-'}</span></div>
+            <div className="flex justify-between w-full border-b border-slate-100 dark:border-slate-700/50 pb-0.5"><span>Grimace:</span><span className="font-black">{s.grimace ?? '-'}</span></div>
+            <div className="flex justify-between w-full border-b border-slate-100 dark:border-slate-700/50 pb-0.5"><span>Tone:</span><span className="font-black">{s.activity ?? '-'}</span></div>
+            <div className="flex justify-between w-full pt-0.5 mb-2"><span>Breathing:</span><span className="font-black">{s.respiration ?? '-'}</span></div>
+          </>
+        ) : (
+          <div className="text-center font-bold text-slate-400 py-2 mb-1 bg-slate-100 dark:bg-slate-800 rounded-lg">No scores recorded</div>
+        )}
 
         <button
-          onClick={(e) => { e.stopPropagation(); onEditScore(interval, session, index, isOffline); }}
-          className="mt-2 flex items-center justify-center gap-1.5 py-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-colors rounded-lg font-bold uppercase tracking-wider text-[10px]"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEditScore(interval, session, index, isOffline); }}
+          className="mt-2 flex items-center justify-center gap-1.5 py-2.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-colors rounded-xl font-black uppercase tracking-wider text-[11px] w-full active:scale-95"
         >
-          <Edit2 size={12} /> Edit {interval}-Min
+          <Edit2 size={14} /> {hasScores ? `Edit ${interval}-Min` : `Add ${interval}-Min`}
         </button>
       </div>
     );
@@ -164,7 +175,7 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
   };
 
   return (
-    <div className={`p-5 sm:p-6 rounded-[2rem] shadow-sm border-2 ${isOffline ? 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800' : 'bg-white border-slate-100 dark:bg-slate-800 dark:border-slate-700'} mb-4 relative overflow-hidden group`}>
+    <div className={`p-4 sm:p-6 rounded-[2rem] shadow-sm border-2 ${isOffline ? 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800' : 'bg-white border-slate-100 dark:bg-slate-800 dark:border-slate-700'} mb-4 relative overflow-hidden group`}>
       {isOffline && (
         <div className="absolute top-0 right-0 bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 text-[10px] font-bold px-3 py-1 rounded-bl-xl flex items-center gap-1 uppercase tracking-wider">
           <CloudOff size={12} /> Pending Sync
@@ -172,33 +183,33 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
       )}
 
       {/* Header Row */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="font-black text-2xl text-slate-800 dark:text-slate-100">{dateFormatted}</div>
+      <div className="flex justify-between items-center mb-5">
+        <div className="font-black text-xl sm:text-2xl text-slate-800 dark:text-slate-100">{dateFormatted}</div>
         <div className="flex gap-2">
-          <button onClick={() => onFullEdit(session, index, isOffline)} className="p-2.5 bg-slate-50 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 dark:bg-slate-900/50 dark:hover:bg-indigo-900/50 rounded-xl transition-colors border border-slate-100 dark:border-slate-700" title="Edit Times">
-            <Edit2 size={18} />
+          <button onClick={() => onFullEdit(session, index, isOffline)} className="p-2 sm:p-2.5 bg-slate-50 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 dark:bg-slate-900/50 dark:hover:bg-indigo-900/50 rounded-xl transition-colors border border-slate-100 dark:border-slate-700" title="Edit Times">
+            <Edit2 size={16} />
           </button>
-          <button onClick={handleDelete} className="p-2.5 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 dark:bg-slate-900/50 dark:hover:bg-rose-900/50 rounded-xl transition-colors border border-slate-100 dark:border-slate-700" title="Delete Session">
-            <Trash2 size={18} />
+          <button onClick={handleDelete} className="p-2 sm:p-2.5 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 dark:bg-slate-900/50 dark:hover:bg-rose-900/50 rounded-xl transition-colors border border-slate-100 dark:border-slate-700" title="Delete Session">
+            <Trash2 size={16} />
           </button>
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4 border-b border-slate-100 dark:border-slate-700/50 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start mb-5 gap-3 border-b border-slate-100 dark:border-slate-700/50 pb-5">
         <div>
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest w-20">Head Out:</span>
-              <span className="text-slate-700 dark:text-slate-300 font-semibold flex items-center">
+              <span className="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest w-16 sm:w-20">Head Out:</span>
+              <span className="text-sm sm:text-base text-slate-700 dark:text-slate-300 font-semibold flex items-center">
                 {headOutTime} {getTimezoneBadge(tz)}
               </span>
             </div>
             {bodyOutTime && (
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest w-20">Body Out:</span>
-                <span className="text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-2">
+                <span className="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest w-16 sm:w-20">Body Out:</span>
+                <span className="text-sm sm:text-base text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-2">
                   <span className="flex items-center">{bodyOutTime} {getTimezoneBadge(tz)}</span>
-                  <span className="bg-rose-100 dark:bg-rose-900/30 text-rose-500 text-[10px] px-2 py-0.5 rounded-md">
+                  <span className="bg-rose-100 dark:bg-rose-900/30 text-rose-500 text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-md">
                     +{headToBodyDuration}
                   </span>
                 </span>
@@ -207,9 +218,9 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
           </div>
         </div>
 
-        <div className="text-left sm:text-right bg-slate-50 dark:bg-slate-900/30 p-3.5 rounded-2xl w-full sm:w-auto border border-slate-100 dark:border-slate-700">
-          <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Delivery</div>
-          <div className="font-black text-emerald-600 dark:text-emerald-400 text-xl">
+        <div className="text-left sm:text-right bg-slate-50 dark:bg-slate-900/30 p-3 rounded-2xl w-full sm:w-auto border border-slate-100 dark:border-slate-700">
+          <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-0.5">Total Delivery</div>
+          <div className="font-black text-emerald-600 dark:text-emerald-400 text-lg sm:text-xl">
             {formatDuration(session.deliveryStartTime, session.apgar5MinParams?.timeCompleted)}
           </div>
         </div>
@@ -219,21 +230,45 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
         className="grid grid-cols-1 sm:grid-cols-2 gap-3 cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
-        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 flex flex-col justify-start items-center h-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-100 dark:border-slate-700 relative">
+        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 sm:p-5 flex flex-col justify-start items-center h-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-100 dark:border-slate-700 relative">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">1-Min Score</span>
-          <span className={`text-3xl font-black ${session.apgar1MinParams?.inProgress ? 'text-amber-500' : session.apgar1MinParams?.skipped ? 'text-slate-400' : 'text-violet-600 dark:text-violet-400'}`}>
+          <span className={`text-2xl sm:text-3xl font-black ${session.apgar1MinParams?.inProgress ? 'text-amber-500' : session.apgar1MinParams?.skipped ? 'text-slate-400' : 'text-violet-600 dark:text-violet-400'}`}>
             {formatScoreTitle(session.apgar1MinParams)}
           </span>
-          {!expanded && <span className="text-[9px] text-slate-400 mt-2 uppercase tracking-widest bg-slate-200/50 dark:bg-slate-800 px-2 py-1 rounded-full flex items-center gap-1"><Edit2 size={8} /> Tap to edit</span>}
+          
+          {/* Dynamic Expansion Pill */}
+          {!expanded && (
+             <span className="text-[9px] text-slate-400 mt-2 uppercase tracking-widest bg-slate-200/50 dark:bg-slate-800 px-2 py-1 rounded-full flex items-center gap-1">
+               <ChevronDown size={10} /> {session.apgar1MinParams?.skipped || !session.apgar1MinParams ? 'Tap to add' : 'Tap for details'}
+             </span>
+          )}
+          {expanded && (
+             <span className="text-[9px] text-slate-400 mt-2 uppercase tracking-widest bg-slate-200/50 dark:bg-slate-800 px-2 py-1 rounded-full flex items-center gap-1">
+               <ChevronUp size={10} /> Close
+             </span>
+          )}
+          
           {expanded && renderScores(session.apgar1MinParams, 1)}
         </div>
 
-        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 flex flex-col justify-start items-center h-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-100 dark:border-slate-700 relative">
+        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 sm:p-5 flex flex-col justify-start items-center h-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-100 dark:border-slate-700 relative">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">5-Min Score</span>
-          <span className={`text-3xl font-black ${session.apgar5MinParams?.inProgress ? 'text-amber-500' : session.apgar5MinParams?.skipped ? 'text-slate-400' : 'text-sky-600 dark:text-sky-400'}`}>
+          <span className={`text-2xl sm:text-3xl font-black ${session.apgar5MinParams?.inProgress ? 'text-amber-500' : session.apgar5MinParams?.skipped ? 'text-slate-400' : 'text-sky-600 dark:text-sky-400'}`}>
             {formatScoreTitle(session.apgar5MinParams)}
           </span>
-          {!expanded && <span className="text-[9px] text-slate-400 mt-2 uppercase tracking-widest bg-slate-200/50 dark:bg-slate-800 px-2 py-1 rounded-full flex items-center gap-1"><Edit2 size={8} /> Tap to edit</span>}
+          
+          {/* Dynamic Expansion Pill */}
+          {!expanded && (
+             <span className="text-[9px] text-slate-400 mt-2 uppercase tracking-widest bg-slate-200/50 dark:bg-slate-800 px-2 py-1 rounded-full flex items-center gap-1">
+               <ChevronDown size={10} /> {session.apgar5MinParams?.skipped || !session.apgar5MinParams ? 'Tap to add' : 'Tap for details'}
+             </span>
+          )}
+          {expanded && (
+             <span className="text-[9px] text-slate-400 mt-2 uppercase tracking-widest bg-slate-200/50 dark:bg-slate-800 px-2 py-1 rounded-full flex items-center gap-1">
+               <ChevronUp size={10} /> Close
+             </span>
+          )}
+
           {expanded && renderScores(session.apgar5MinParams, 5)}
         </div>
       </div>
@@ -250,7 +285,6 @@ export const HistoryTab = () => {
 
   const [modalState, setModalState] = useState({ isOpen: false, type: '', title: '', message: '', onConfirm: null });
 
-  // Modals for editing history
   const [editApgarModal, setEditApgarModal] = useState({ isOpen: false, interval: null, session: null, index: null, isOffline: false });
   const [fullEditModal, setFullEditModal] = useState({ isOpen: false, session: null, index: null, isOffline: false });
 
@@ -324,80 +358,77 @@ export const HistoryTab = () => {
     setFullEditModal({ isOpen: false });
   };
 
-  // Determine Sync Status
   const isSyncing = localQueue.length > 0;
 
   return (
     <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 pb-32">
-      <div className="mb-8 flex items-center justify-between">
-        <h2 className="text-3xl font-black text-slate-800 dark:text-white flex items-center gap-3">
-          <CalendarDays className="text-indigo-500" size={32} />
+      <div className="mb-6 sm:mb-8 flex items-center justify-between">
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white flex items-center gap-3">
+          <CalendarDays className="text-indigo-500" size={28} />
           History
         </h2>
-        <div className="flex items-center gap-3">
-
-          {/* Dynamic Sync Badge */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          
           {isSyncing ? (
-            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400 px-3 py-1.5 rounded-full border border-amber-200 dark:border-amber-800/50">
-              <RefreshCw size={14} className="animate-spin" /> Syncing...
-            </div>
+             <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400 px-3 py-1.5 rounded-full border border-amber-200 dark:border-amber-800/50">
+               <RefreshCw size={14} className="animate-spin" /> Syncing
+             </div>
           ) : (
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-transparent">
-              <Cloud size={14} className="text-emerald-500" /> Synced
-            </div>
+             <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-transparent">
+               <Cloud size={14} className="text-emerald-500" /> Synced
+             </div>
           )}
-
+          
           {(cloudSessions.length > 0 || localQueue.length > 0) && (
             <button
               onClick={handleDeleteAll}
-              className="bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400 p-2.5 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors border border-rose-100 dark:border-rose-900/50"
+              className="bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400 p-2 sm:p-2.5 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors border border-rose-100 dark:border-rose-900/50"
             >
-              <Trash2 size={18} />
+              <Trash2 size={16} />
             </button>
           )}
         </div>
       </div>
-
-      {/* Database Error Debugger Readout */}
+      
       {isSyncing && syncError && (
-        <div className="mb-8 p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/50 rounded-2xl flex items-start gap-3">
-          <AlertCircle className="text-rose-500 shrink-0 mt-0.5" size={20} />
-          <div>
-            <h4 className="text-rose-700 dark:text-rose-400 font-bold text-sm mb-1">Database Sync Error</h4>
-            <p className="text-rose-600/80 dark:text-rose-400/80 text-xs font-mono">{syncError}</p>
-          </div>
-        </div>
+         <div className="mb-6 sm:mb-8 p-3 sm:p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/50 rounded-2xl flex items-start gap-3">
+            <AlertCircle className="text-rose-500 shrink-0 mt-0.5" size={18} />
+            <div>
+               <h4 className="text-rose-700 dark:text-rose-400 font-bold text-xs sm:text-sm mb-1">Database Sync Error</h4>
+               <p className="text-rose-600/80 dark:text-rose-400/80 text-[10px] sm:text-xs font-mono">{syncError}</p>
+            </div>
+         </div>
       )}
 
       {modalState.isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl relative overflow-hidden border border-slate-100 dark:border-slate-800">
-            <div className="flex flex-col items-center text-center gap-4 relative z-10">
+          <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 sm:p-8 max-w-sm w-full shadow-2xl relative overflow-hidden border border-slate-100 dark:border-slate-800">
+            <div className="flex flex-col items-center text-center gap-3 sm:gap-4 relative z-10">
               {modalState.type === 'danger' ? (
-                <div className="bg-rose-100 dark:bg-rose-900/30 p-4 rounded-full text-rose-500 dark:text-rose-400 mb-2">
-                  <AlertTriangle size={40} strokeWidth={2.5} />
+                <div className="bg-rose-100 dark:bg-rose-900/30 p-3 sm:p-4 rounded-full text-rose-500 dark:text-rose-400 mb-2">
+                  <AlertTriangle size={32} strokeWidth={2.5} />
                 </div>
               ) : (
-                <div className="bg-indigo-100 dark:bg-indigo-900/30 p-4 rounded-full text-indigo-500 dark:text-indigo-400 mb-2">
-                  <Info size={40} strokeWidth={2.5} />
+                <div className="bg-indigo-100 dark:bg-indigo-900/30 p-3 sm:p-4 rounded-full text-indigo-500 dark:text-indigo-400 mb-2">
+                  <Info size={32} strokeWidth={2.5} />
                 </div>
               )}
 
-              <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100">{modalState.title}</h3>
-              <p className="text-slate-500 dark:text-slate-400 font-medium mb-4">{modalState.message}</p>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100">{modalState.title}</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-2 sm:mb-4">{modalState.message}</p>
 
-              <div className="flex flex-col gap-3 w-full">
+              <div className="flex flex-col gap-2.5 w-full">
                 {modalState.type === 'danger' ? (
                   <>
-                    <button onClick={executeModalConfirm} className="w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-black text-lg shadow-lg shadow-rose-500/30 transition-all active:scale-95 touch-manipulation">
+                    <button onClick={executeModalConfirm} className="w-full py-3.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-black text-base shadow-lg shadow-rose-500/30 transition-all active:scale-95 touch-manipulation">
                       Yes, Delete
                     </button>
-                    <button onClick={() => setModalState({ isOpen: false })} className="w-full py-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-all">
+                    <button onClick={() => setModalState({ isOpen: false })} className="w-full py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-all">
                       Cancel
                     </button>
                   </>
                 ) : (
-                  <button onClick={() => setModalState({ isOpen: false })} className="w-full py-4 rounded-2xl bg-indigo-500 hover:bg-indigo-600 text-white font-black text-lg shadow-lg shadow-indigo-500/30 transition-all active:scale-95 touch-manipulation">
+                  <button onClick={() => setModalState({ isOpen: false })} className="w-full py-3.5 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-black text-base shadow-lg shadow-indigo-500/30 transition-all active:scale-95 touch-manipulation">
                     Got it
                   </button>
                 )}
@@ -407,7 +438,6 @@ export const HistoryTab = () => {
         </div>
       )}
 
-      {/* Full Session Editor Modal */}
       {fullEditModal.isOpen && (
         <EditSessionModal
           session={fullEditModal.session}
@@ -416,7 +446,6 @@ export const HistoryTab = () => {
         />
       )}
 
-      {/* APGAR Specific Inline Editor */}
       {editApgarModal.isOpen && (
         <ApgarModal
           interval={editApgarModal.interval}
@@ -427,7 +456,7 @@ export const HistoryTab = () => {
       )}
 
       {localQueue.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           {localQueue.map((s, i) => (
             <SessionCard
               key={`off-${i}`}
@@ -446,9 +475,9 @@ export const HistoryTab = () => {
       )}
 
       {cloudSessions.length === 0 && localQueue.length === 0 ? (
-        <div className="text-center p-12 bg-slate-50 dark:bg-slate-800/50 rounded-[3rem] border border-slate-100 dark:border-slate-800 mt-4">
-          <CheckCircle2 size={48} className="text-slate-300 mx-auto mb-4" />
-          <p className="font-bold text-slate-500">No birth sessions recorded yet.</p>
+        <div className="text-center p-8 sm:p-12 bg-slate-50 dark:bg-slate-800/50 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 mt-4">
+          <CheckCircle2 size={40} className="text-slate-300 mx-auto mb-3" />
+          <p className="font-bold text-sm text-slate-500">No birth sessions recorded yet.</p>
         </div>
       ) : (
         <div>
