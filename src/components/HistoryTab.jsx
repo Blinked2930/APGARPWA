@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { format } from "date-fns";
-import { CalendarDays, CloudOff, Cloud, CheckCircle2, Trash2, AlertTriangle, Edit2, Info, Clock, RefreshCw, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { CalendarDays, CloudOff, Cloud, CheckCircle2, Trash2, AlertTriangle, Edit2, Info, Clock, RefreshCw, AlertCircle, ChevronDown, ChevronUp, Activity } from "lucide-react";
 import { ApgarModal } from './ApgarModal';
 import { useAppContext } from '../context/AppProvider';
 
 // Extracted helper functions
 const formatDuration = (start, end) => {
-  if (!start || !end) return 'N/A';
+  if (!start || !end) return 'In Progress...';
   const totalSecs = Math.floor((end - start) / 1000);
   const m = Math.floor(totalSecs / 60);
   const s = totalSecs % 60;
@@ -102,8 +102,8 @@ const EditSessionModal = ({ session, onClose, onSave }) => {
   );
 };
 
-const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, deleteSingleSession, setModalState, onEditScore, onFullEdit }) => {
-  const [expanded, setExpanded] = useState(false);
+const SessionCard = ({ session, isOffline, isActive, index, localQueue, setLocalQueue, deleteSingleSession, setModalState, onEditScore, onFullEdit }) => {
+  const [expanded, setExpanded] = useState(isActive); // Auto-expand if active
 
   const dateObj = new Date(session.deliveryStartTime);
   const dateFormatted = format(dateObj, "MMM do, yyyy");
@@ -158,12 +158,15 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
           <div className="text-center font-bold text-slate-400 py-2 mb-1 bg-slate-100 dark:bg-slate-800 rounded-lg">No scores recorded</div>
         )}
 
-        <button
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEditScore(interval, session, index, isOffline); }}
-          className="mt-2 flex items-center justify-center gap-1.5 py-2.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-colors rounded-xl font-black uppercase tracking-wider text-[11px] w-full active:scale-95"
-        >
-          <Edit2 size={14} /> {hasScores ? `Edit ${interval}-Min` : `Add ${interval}-Min`}
-        </button>
+        {/* Hide edit buttons if this is the Live session (must edit on Active Tab) */}
+        {!isActive && (
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEditScore(interval, session, index, isOffline); }}
+            className="mt-2 flex items-center justify-center gap-1.5 py-2.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-colors rounded-xl font-black uppercase tracking-wider text-[11px] w-full active:scale-95"
+          >
+            <Edit2 size={14} /> {hasScores ? `Edit ${interval}-Min` : `Add ${interval}-Min`}
+          </button>
+        )}
       </div>
     );
   };
@@ -175,7 +178,6 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
     return `${params.total ?? '?'}/10`;
   };
 
-  // NEW: Compact Milestone Row component
   const MilestoneRow = ({ label, ts, icon }) => {
     if (!ts) return null;
     return (
@@ -190,28 +192,42 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
     );
   };
 
+  // Set card styling based on state (Active vs Offline vs Synced)
+  let cardStyles = 'bg-white border-slate-100 dark:bg-slate-800 dark:border-slate-700';
+  if (isOffline) cardStyles = 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800';
+  if (isActive) cardStyles = 'bg-indigo-50/30 border-indigo-200 shadow-indigo-500/10 shadow-lg dark:bg-indigo-900/10 dark:border-indigo-800/50';
+
   return (
-    <div className={`p-4 sm:p-6 rounded-[2rem] shadow-sm border-2 ${isOffline ? 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800' : 'bg-white border-slate-100 dark:bg-slate-800 dark:border-slate-700'} mb-4 relative overflow-hidden group`}>
-      {isOffline && (
+    <div className={`p-4 sm:p-6 rounded-[2rem] shadow-sm border-2 ${cardStyles} mb-4 relative overflow-hidden group`}>
+      {isActive && (
+        <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl flex items-center gap-1.5 uppercase tracking-wider shadow-sm">
+          <Activity size={12} className="animate-pulse" /> Live Recording
+        </div>
+      )}
+      
+      {!isActive && isOffline && (
         <div className="absolute top-0 right-0 bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 text-[10px] font-bold px-3 py-1 rounded-bl-xl flex items-center gap-1 uppercase tracking-wider">
           <CloudOff size={12} /> Pending Sync
         </div>
       )}
 
       {/* Header Row */}
-      <div className="flex justify-between items-center mb-5">
+      <div className="flex justify-between items-center mb-5 mt-2">
         <div className="font-black text-xl sm:text-2xl text-slate-800 dark:text-slate-100">{dateFormatted}</div>
-        <div className="flex gap-2">
-          <button onClick={() => onFullEdit(session, index, isOffline)} className="p-2 sm:p-2.5 bg-slate-50 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 dark:bg-slate-900/50 dark:hover:bg-indigo-900/50 rounded-xl transition-colors border border-slate-100 dark:border-slate-700" title="Edit Times">
-            <Edit2 size={16} />
-          </button>
-          <button onClick={handleDelete} className="p-2 sm:p-2.5 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 dark:bg-slate-900/50 dark:hover:bg-rose-900/50 rounded-xl transition-colors border border-slate-100 dark:border-slate-700" title="Delete Session">
-            <Trash2 size={16} />
-          </button>
-        </div>
+        
+        {/* Hide Delete/Edit if it's the live session */}
+        {!isActive && (
+          <div className="flex gap-2">
+            <button onClick={() => onFullEdit(session, index, isOffline)} className="p-2 sm:p-2.5 bg-slate-50 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 dark:bg-slate-900/50 dark:hover:bg-indigo-900/50 rounded-xl transition-colors border border-slate-100 dark:border-slate-700" title="Edit Times">
+              <Edit2 size={16} />
+            </button>
+            <button onClick={handleDelete} className="p-2 sm:p-2.5 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 dark:bg-slate-900/50 dark:hover:bg-rose-900/50 rounded-xl transition-colors border border-slate-100 dark:border-slate-700" title="Delete Session">
+              <Trash2 size={16} />
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* NEW: Pre-Delivery Milestones */}
       {(m.rom || m.crown) && (
         <div className="mb-3">
           <MilestoneRow label="ROM" ts={m.rom} icon="💧" />
@@ -219,7 +235,6 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
         </div>
       )}
 
-      {/* Core Delivery Timers */}
       <div className="flex flex-col sm:flex-row justify-between items-start mb-3 gap-3">
         <div className="w-full sm:w-auto">
           <div className="flex flex-col gap-1.5">
@@ -245,13 +260,12 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
 
         <div className="text-left sm:text-right bg-slate-50 dark:bg-slate-900/30 p-3 rounded-2xl w-full sm:w-auto border border-slate-100 dark:border-slate-700">
           <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-0.5">Total Delivery</div>
-          <div className="font-black text-emerald-600 dark:text-emerald-400 text-lg sm:text-xl">
+          <div className={`font-black text-lg sm:text-xl ${isActive ? 'text-indigo-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
             {formatDuration(session.deliveryStartTime, session.apgar5MinParams?.timeCompleted)}
           </div>
         </div>
       </div>
 
-      {/* NEW: Post-Delivery Milestones */}
       {(m.firstCry || m.placenta) && (
         <div className="mb-4">
           <MilestoneRow label="First Cry" ts={m.firstCry} icon="🗣️" />
@@ -310,20 +324,30 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
 };
 
 export const HistoryTab = () => {
-  const { syncError } = useAppContext();
+  const { syncError, deliveryStartTime, bodyOutTimes, apgar1MinParams, apgar5MinParams, milestones, recordedTimeZone } = useAppContext();
+  
   const cloudSessions = useQuery(api.sessions.getSessions) || [];
   const deleteAllSessions = useMutation(api.sessions.deleteAllSessions);
   const deleteSingleSession = api.sessions.deleteSession ? useMutation(api.sessions.deleteSession) : null;
   const updateSessionToCloud = api.sessions.updateSession ? useMutation(api.sessions.updateSession) : null;
 
   const [modalState, setModalState] = useState({ isOpen: false, type: '', title: '', message: '', onConfirm: null });
-
   const [editApgarModal, setEditApgarModal] = useState({ isOpen: false, interval: null, session: null, index: null, isOffline: false });
   const [fullEditModal, setFullEditModal] = useState({ isOpen: false, session: null, index: null, isOffline: false });
 
   const queueStr = localStorage.getItem('offlineQueue');
   const offlineSessions = queueStr ? JSON.parse(queueStr) : [];
   const [localQueue, setLocalQueue] = useState(offlineSessions);
+
+  // Construct a ghost session from the currently active variables
+  const activeSession = deliveryStartTime ? {
+    deliveryStartTime,
+    bodyOutTimes,
+    apgar1MinParams,
+    apgar5MinParams,
+    milestones,
+    recordedTimeZone
+  } : null;
 
   const handleDeleteAll = () => {
     setModalState({
@@ -488,6 +512,25 @@ export const HistoryTab = () => {
         />
       )}
 
+      {/* NEW: Render the actively recording session at the very top! */}
+      {activeSession && (
+        <div className="mb-4 sm:mb-6">
+          <SessionCard
+            key="active-session"
+            session={activeSession}
+            isOffline={false}
+            isActive={true} // Triggers special UI
+            index={-1}
+            localQueue={localQueue}
+            setLocalQueue={setLocalQueue}
+            deleteSingleSession={deleteSingleSession}
+            setModalState={setModalState}
+            onEditScore={openHistoricalApgarEdit}
+            onFullEdit={openFullEdit}
+          />
+        </div>
+      )}
+
       {localQueue.length > 0 && (
         <div className="mb-4 sm:mb-6">
           {localQueue.map((s, i) => (
@@ -495,6 +538,7 @@ export const HistoryTab = () => {
               key={`off-${i}`}
               session={s}
               isOffline={true}
+              isActive={false}
               index={i}
               localQueue={localQueue}
               setLocalQueue={setLocalQueue}
@@ -507,7 +551,7 @@ export const HistoryTab = () => {
         </div>
       )}
 
-      {cloudSessions.length === 0 && localQueue.length === 0 ? (
+      {cloudSessions.length === 0 && localQueue.length === 0 && !activeSession ? (
         <div className="text-center p-8 sm:p-12 bg-slate-50 dark:bg-slate-800/50 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 mt-4">
           <CheckCircle2 size={40} className="text-slate-300 mx-auto mb-3" />
           <p className="font-bold text-sm text-slate-500">No birth sessions recorded yet.</p>
@@ -519,6 +563,7 @@ export const HistoryTab = () => {
               key={s._id || i}
               session={s}
               isOffline={false}
+              isActive={false}
               index={i}
               localQueue={localQueue}
               setLocalQueue={setLocalQueue}
