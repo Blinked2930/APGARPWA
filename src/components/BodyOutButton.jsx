@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppContext } from '../context/AppProvider';
-import { Baby, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 export const BodyOutButton = () => {
   const { markBodyOut, bodyOutTimes } = useAppContext();
@@ -31,10 +31,7 @@ export const BodyOutButton = () => {
             <span className="text-xl sm:text-2xl font-black tracking-wide uppercase">Recorded</span>
           </>
         ) : (
-          <>
-            <Baby size={48} className="mb-1 opacity-95" strokeWidth={2.5} />
-            <span className="text-2xl sm:text-3xl font-black tracking-wide">BODY OUT</span>
-          </>
+          <span className="text-2xl sm:text-3xl font-black tracking-wide">BODY OUT</span>
         )}
       </button>
     </div>

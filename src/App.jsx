@@ -16,9 +16,8 @@ const MainTimerView = () => {
   const isBirthFinished = !!apgar5MinParams;
 
   return (
-    // FIX 1: Changed 'h-full' to 'min-h-full pb-8'. 
-    // It perfectly centers small content, but expands and allows scrolling for tall content like the Summary Screen.
-    <div className="w-full max-w-2xl min-h-full flex flex-col items-center justify-center gap-2 sm:gap-4 px-2 sm:px-4 mx-auto pb-8">
+    // FIX 1: Stripped all height and centering constraints. Added 'shrink-0' so it never crushes itself.
+    <div className="w-full max-w-2xl flex flex-col items-center gap-2 sm:gap-4 px-2 sm:px-4 mx-auto shrink-0 relative z-20">
 
       <Stopwatch />
 
@@ -52,12 +51,26 @@ const AppContent = () => {
       {/* Decorative ambient background glows */}
       <div className="absolute top-0 inset-x-0 h-48 sm:h-64 bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] pointer-events-none"></div>
 
-      {/* FIX 2: Removed the strict 'overflow-hidden'. Both tabs are now allowed to scroll if they get too tall. */}
-      <div className="flex-1 w-full flex flex-col pt-[max(env(safe-area-inset-top),1rem)] pb-[85px] overflow-y-auto">
-        {activeTab === 'timer' ? <MainTimerView /> : <HistoryTab />}
+      {/* Main Scrollable Viewport */}
+      <div className="flex-1 w-full flex flex-col overflow-y-auto z-10 relative">
+        {activeTab === 'timer' ? (
+          <>
+            {/* FIX 2: Invisible Top Spacer (Pushes the timer down to center it) */}
+            <div className="flex-1 min-h-[max(env(safe-area-inset-top),1rem)] shrink-0 pointer-events-none"></div>
+            
+            <MainTimerView />
+            
+            {/* FIX 3: Invisible Bottom Spacer (Pushes the timer up, and provides padding so the summary clears the nav bar) */}
+            <div className="flex-1 min-h-[calc(100px+env(safe-area-inset-bottom))] shrink-0 pointer-events-none"></div>
+          </>
+        ) : (
+          <div className="w-full pt-[max(env(safe-area-inset-top),2rem)] pb-[calc(100px+env(safe-area-inset-bottom))]">
+            <HistoryTab />
+          </div>
+        )}
       </div>
 
-      {/* Bottom Navigation (Fixed absolutely inside the 100dvh container) */}
+      {/* Bottom Navigation */}
       <div className="absolute bottom-0 inset-x-0 h-[80px] bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200/50 dark:border-white/5 p-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] flex justify-center gap-4 z-40">
         <button
           onClick={() => setActiveTab('timer')}
