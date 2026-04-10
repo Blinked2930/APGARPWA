@@ -16,7 +16,6 @@ const MainTimerView = () => {
   const isBirthFinished = !!apgar5MinParams;
 
   return (
-    // FIX 1: Stripped all height and centering constraints. Added 'shrink-0' so it never crushes itself.
     <div className="w-full max-w-2xl flex flex-col items-center gap-2 sm:gap-4 px-2 sm:px-4 mx-auto shrink-0 relative z-20">
 
       <Stopwatch />
@@ -49,25 +48,25 @@ const AppContent = () => {
     <div className="h-[100dvh] w-full text-slate-900 dark:text-slate-100 font-sans flex flex-col selection:bg-transparent transition-colors bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
 
       {/* Decorative ambient background glows */}
-      <div className="absolute top-0 inset-x-0 h-48 sm:h-64 bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] pointer-events-none"></div>
+      <div className="absolute top-0 inset-x-0 h-48 sm:h-64 bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] pointer-events-none z-0"></div>
 
-      {/* Main Scrollable Viewport */}
-      <div className="flex-1 w-full flex flex-col overflow-y-auto z-10 relative">
+      {/* FIX: Removed 'flex flex-col' from here. It is now a pure scrolling block. */}
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden z-10 relative">
+        
         {activeTab === 'timer' ? (
-          <>
-            {/* FIX 2: Invisible Top Spacer (Pushes the timer down to center it) */}
+          // Active Tab manages its own flex-centering layout
+          <div className="flex flex-col min-h-full w-full">
             <div className="flex-1 min-h-[max(env(safe-area-inset-top),1rem)] shrink-0 pointer-events-none"></div>
-            
             <MainTimerView />
-            
-            {/* FIX 3: Invisible Bottom Spacer (Pushes the timer up, and provides padding so the summary clears the nav bar) */}
-            <div className="flex-1 min-h-[calc(100px+env(safe-area-inset-bottom))] shrink-0 pointer-events-none"></div>
-          </>
+            <div className="flex-1 min-h-[calc(110px+env(safe-area-inset-bottom))] shrink-0 pointer-events-none"></div>
+          </div>
         ) : (
-          <div className="w-full pt-[max(env(safe-area-inset-top),2rem)] pb-[calc(100px+env(safe-area-inset-bottom))]">
+          // History Tab gets a simple unconstrained block so it can scroll infinitely
+          <div className="min-h-full w-full pt-[max(env(safe-area-inset-top),2rem)] pb-[calc(110px+env(safe-area-inset-bottom))]">
             <HistoryTab />
           </div>
         )}
+
       </div>
 
       {/* Bottom Navigation */}
