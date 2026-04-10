@@ -7,6 +7,7 @@ export default defineSchema({
     deliveryStartTime: v.number(),
     bodyOutTimes: v.array(v.number()),
     apgar1MinParams: v.optional(v.any()),
-    apgar5MinParams: v.optional(v.any())
+    apgar5MinParams: v.optional(v.any()),
+    milestones: v.optional(v.any()) // <-- ADDED THIS LINE
   })
 });

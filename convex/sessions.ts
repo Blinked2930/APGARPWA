@@ -15,7 +15,8 @@ export const saveSession = mutation({
     deliveryStartTime: v.number(),
     bodyOutTimes: v.array(v.number()),
     apgar1MinParams: v.optional(v.any()),
-    apgar5MinParams: v.optional(v.any())
+    apgar5MinParams: v.optional(v.any()),
+    milestones: v.optional(v.any()) // <-- ADDED THIS LINE
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("sessions", args);
@@ -45,7 +46,8 @@ export const updateSession = mutation({
     deliveryStartTime: v.optional(v.number()),
     bodyOutTimes: v.optional(v.array(v.number())),
     apgar1MinParams: v.optional(v.any()),
-    apgar5MinParams: v.optional(v.any())
+    apgar5MinParams: v.optional(v.any()),
+    milestones: v.optional(v.any()) // <-- ADDED THIS LINE
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
