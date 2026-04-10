@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppContext } from '../context/AppProvider';
-import { FileText, Edit2, CheckCircle2 } from 'lucide-react'; // Updated Icon
+import { FileText, Edit2, CheckCircle2 } from 'lucide-react';
 
 export const SummaryScreen = () => {
     const { recordedTimeZone, deliveryStartTime, bodyOutTimes, apgar1MinParams, apgar5MinParams, milestones, stopDelivery, openApgarModal } = useAppContext();
@@ -141,12 +141,13 @@ export const SummaryScreen = () => {
                 )}
             </div>
 
-            {/* FIX: This button now passes 'true' to stopDelivery to force the sync to Convex! */}
+            {/* FIX: Adjusted text sizing, added horizontal padding, and shortened text for mobile screens */}
             <button
                 onClick={() => stopDelivery(true)}
-                className="mt-8 w-full py-5 rounded-[2rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xl flex justify-center items-center gap-3 transition-all active:scale-95 touch-manipulation shadow-xl shadow-indigo-500/20"
+                className="mt-8 w-full py-4 sm:py-5 px-4 rounded-[2rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black text-base sm:text-xl flex justify-center items-center gap-2 sm:gap-3 transition-all active:scale-95 touch-manipulation shadow-xl shadow-indigo-500/20"
             >
-                <CheckCircle2 size={26} /> SAVE TO HISTORY & FINISH
+                <CheckCircle2 size={24} className="shrink-0" /> 
+                <span>SAVE & FINISH</span>
             </button>
         </div>
     );
