@@ -35,7 +35,6 @@ export const AppProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : null;
   });
 
-  // NEW: Milestone Memory Storage
   const [milestones, setMilestones] = useState(() => {
     const saved = localStorage.getItem('birthMilestones');
     return saved ? JSON.parse(saved) : { rom: null, crown: null, firstCry: null, placenta: null };
@@ -89,7 +88,6 @@ export const AppProvider = ({ children }) => {
     setAudioMode(prev => prev === 'MUTE' ? 'VOICE' : prev === 'VOICE' ? 'CHIME' : 'MUTE');
   };
 
-  // NEW: Milestone toggle handler (Tap to record, tap again to clear)
   const toggleMilestone = (key) => {
     setMilestones(prev => ({
       ...prev,
@@ -105,13 +103,25 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const stopDelivery = () => {
+  // FIX: stopDelivery now takes a boolean. If true, it pushes everything to Convex!
+  const stopDelivery = (saveToHistory = false) => {
+    if (saveToHistory && deliveryStartTime) {
+        queueSession({
+            recordedTimeZone,
+            deliveryStartTime,
+            bodyOutTimes,
+            apgar1MinParams,
+            apgar5MinParams,
+            milestones // Everything is captured!
+        });
+    }
+
     setDeliveryStartTime(null);
     setRecordedTimeZone(null);
     setBodyOutTimes([]);
     setApgar1MinParams(null);
     setApgar5MinParams(null);
-    setMilestones({ rom: null, crown: null, firstCry: null, placenta: null }); // Clear milestones
+    setMilestones({ rom: null, crown: null, firstCry: null, placenta: null }); 
 
     localStorage.removeItem('deliveryStartTime');
     localStorage.removeItem('recordedTimeZone');
@@ -134,14 +144,7 @@ export const AppProvider = ({ children }) => {
       setApgar1MinParams(scoreData);
     } else if (interval === 5) {
       setApgar5MinParams(scoreData);
-      queueSession({
-        recordedTimeZone,
-        deliveryStartTime,
-        bodyOutTimes,
-        apgar1MinParams,
-        apgar5MinParams: scoreData,
-        milestones // Included in payload for upcoming Convex Sync!
-      });
+      // FIX: Removed queueSession from here so it doesn't fire prematurely!
     }
   };
 

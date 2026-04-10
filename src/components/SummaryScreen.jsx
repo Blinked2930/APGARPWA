@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppContext } from '../context/AppProvider';
-import { FileText, RotateCcw, Edit2 } from 'lucide-react';
+import { FileText, Edit2, CheckCircle2 } from 'lucide-react'; // Updated Icon
 
 export const SummaryScreen = () => {
     const { recordedTimeZone, deliveryStartTime, bodyOutTimes, apgar1MinParams, apgar5MinParams, milestones, stopDelivery, openApgarModal } = useAppContext();
@@ -44,7 +44,6 @@ export const SummaryScreen = () => {
     const getColorClass1 = (params) => params.skipped ? 'text-slate-400' : params.inProgress ? 'text-amber-500 dark:text-amber-400' : 'text-violet-600 dark:text-violet-400';
     const getColorClass5 = (params) => params.skipped ? 'text-slate-400' : params.inProgress ? 'text-amber-500 dark:text-amber-400' : 'text-sky-600 dark:text-sky-400';
 
-    // Helper component to render simple milestone rows cleanly
     const MilestoneRow = ({ label, ts, icon }) => {
         if (!ts) return null;
         return (
@@ -74,13 +73,12 @@ export const SummaryScreen = () => {
     };
 
     return (
-        <div className="w-full mt-8 p-6 sm:p-8 bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-xl shadow-slate-200/50 dark:shadow-none border-2 border-slate-100 dark:border-slate-700 overflow-hidden">
+        <div className="w-full mt-8 p-6 sm:p-8 bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-xl shadow-slate-200/50 dark:shadow-none border-2 border-slate-100 dark:border-slate-700 overflow-hidden relative z-10">
             <h3 className="text-2xl font-black mb-6 flex items-center justify-center gap-2 text-slate-800 dark:text-slate-100">
                 <FileText className="text-sky-500" strokeWidth={2.5} /> Birth Summary
             </h3>
 
             <div className="space-y-4 text-lg">
-                {/* Pre-Delivery Milestones */}
                 <MilestoneRow label="ROM (Membranes Ruptured)" ts={milestones.rom} icon="💧" />
                 <MilestoneRow label="Crowning" ts={milestones.crown} icon="👑" />
 
@@ -103,7 +101,6 @@ export const SummaryScreen = () => {
                     </div>
                 ))}
 
-                {/* Post-Delivery Milestones */}
                 <MilestoneRow label="First Cry" ts={milestones.firstCry} icon="🗣️" />
                 <MilestoneRow label="Placenta Delivered" ts={milestones.placenta} icon="🩸" />
 
@@ -144,11 +141,12 @@ export const SummaryScreen = () => {
                 )}
             </div>
 
+            {/* FIX: This button now passes 'true' to stopDelivery to force the sync to Convex! */}
             <button
-                onClick={stopDelivery}
-                className="mt-8 w-full py-5 rounded-[2rem] bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 font-black text-xl flex justify-center items-center gap-2 transition-all active:scale-95 touch-manipulation border border-slate-200 dark:border-slate-600 shadow-sm"
+                onClick={() => stopDelivery(true)}
+                className="mt-8 w-full py-5 rounded-[2rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xl flex justify-center items-center gap-3 transition-all active:scale-95 touch-manipulation shadow-xl shadow-indigo-500/20"
             >
-                <RotateCcw size={24} /> Clear Timer
+                <CheckCircle2 size={26} /> SAVE TO HISTORY & FINISH
             </button>
         </div>
     );
