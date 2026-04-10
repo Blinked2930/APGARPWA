@@ -16,8 +16,9 @@ const MainTimerView = () => {
   const isBirthFinished = !!apgar5MinParams;
 
   return (
-    // FIX: Using flex-1, h-full, and justify-center to dynamically squeeze into 1 screen
-    <div className="w-full max-w-2xl h-full flex flex-col items-center justify-center gap-2 sm:gap-4 px-2 sm:px-4 mx-auto pb-4">
+    // FIX 1: Changed 'h-full' to 'min-h-full pb-8'. 
+    // It perfectly centers small content, but expands and allows scrolling for tall content like the Summary Screen.
+    <div className="w-full max-w-2xl min-h-full flex flex-col items-center justify-center gap-2 sm:gap-4 px-2 sm:px-4 mx-auto pb-8">
 
       <Stopwatch />
 
@@ -46,14 +47,13 @@ const AppContent = () => {
   const [activeTab, setActiveTab] = useState('timer');
 
   return (
-    // FIX: Strict h-[100dvh] and overflow-hidden locks the viewport from scrolling at the root
     <div className="h-[100dvh] w-full text-slate-900 dark:text-slate-100 font-sans flex flex-col selection:bg-transparent transition-colors bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
 
       {/* Decorative ambient background glows */}
       <div className="absolute top-0 inset-x-0 h-48 sm:h-64 bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] pointer-events-none"></div>
 
-      {/* Main Content Area (Scrolls ONLY if History Tab is open) */}
-      <div className={`flex-1 w-full flex flex-col pt-[max(env(safe-area-inset-top),1rem)] pb-[85px] ${activeTab === 'history' ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+      {/* FIX 2: Removed the strict 'overflow-hidden'. Both tabs are now allowed to scroll if they get too tall. */}
+      <div className="flex-1 w-full flex flex-col pt-[max(env(safe-area-inset-top),1rem)] pb-[85px] overflow-y-auto">
         {activeTab === 'timer' ? <MainTimerView /> : <HistoryTab />}
       </div>
 
