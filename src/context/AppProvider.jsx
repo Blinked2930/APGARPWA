@@ -5,10 +5,9 @@ import { useOfflineSync } from '../hooks/useOfflineSync';
 
 const AppContext = createContext();
 
-// CENTRALIZED CONFIGURATION: Production Timing
 const APGAR_CONFIG = {
-  INTERVAL_1: 60000,   // 1 minute (60,000ms)
-  INTERVAL_2: 300000,  // 5 minutes (300,000ms)
+  INTERVAL_1: 60000,
+  INTERVAL_2: 300000,
 };
 
 export const AppProvider = ({ children }) => {
@@ -36,6 +35,12 @@ export const AppProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : null;
   });
 
+  // NEW: Milestone Memory Storage
+  const [milestones, setMilestones] = useState(() => {
+    const saved = localStorage.getItem('birthMilestones');
+    return saved ? JSON.parse(saved) : { rom: null, crown: null, firstCry: null, placenta: null };
+  });
+
   const [audioMode, setAudioMode] = useState(() => {
     return localStorage.getItem('audioMode') || 'VOICE';
   });
@@ -46,9 +51,11 @@ export const AppProvider = ({ children }) => {
   const { requestWakeLock, releaseWakeLock } = useWakeLock();
   const { queueSession, syncError } = useOfflineSync();
 
+  useEffect(() => { localStorage.setItem('audioMode', audioMode); }, [audioMode]);
+
   useEffect(() => {
-    localStorage.setItem('audioMode', audioMode);
-  }, [audioMode]);
+    localStorage.setItem('birthMilestones', JSON.stringify(milestones));
+  }, [milestones]);
 
   useEffect(() => {
     if (deliveryStartTime) {
@@ -79,11 +86,15 @@ export const AppProvider = ({ children }) => {
 
   const toggleAudioMode = () => {
     initAudio();
-    setAudioMode(prev => {
-      if (prev === 'MUTE') return 'VOICE';
-      if (prev === 'VOICE') return 'CHIME';
-      return 'MUTE';
-    });
+    setAudioMode(prev => prev === 'MUTE' ? 'VOICE' : prev === 'VOICE' ? 'CHIME' : 'MUTE');
+  };
+
+  // NEW: Milestone toggle handler (Tap to record, tap again to clear)
+  const toggleMilestone = (key) => {
+    setMilestones(prev => ({
+      ...prev,
+      [key]: prev[key] ? null : Date.now()
+    }));
   };
 
   const startDelivery = () => {
@@ -100,12 +111,14 @@ export const AppProvider = ({ children }) => {
     setBodyOutTimes([]);
     setApgar1MinParams(null);
     setApgar5MinParams(null);
+    setMilestones({ rom: null, crown: null, firstCry: null, placenta: null }); // Clear milestones
 
     localStorage.removeItem('deliveryStartTime');
     localStorage.removeItem('recordedTimeZone');
     localStorage.removeItem('bodyOutTimes');
     localStorage.removeItem('apgar1MinParams');
     localStorage.removeItem('apgar5MinParams');
+    localStorage.removeItem('birthMilestones');
   };
 
   const markBodyOut = () => {
@@ -113,10 +126,7 @@ export const AppProvider = ({ children }) => {
       setDeliveryStartTime(Date.now());
       setRecordedTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
     }
-    setBodyOutTimes(prev => {
-      if (prev.length === 0) return [Date.now()];
-      return prev;
-    });
+    setBodyOutTimes(prev => prev.length === 0 ? [Date.now()] : prev);
   };
 
   const saveApgarScore = (interval, scoreData) => {
@@ -129,7 +139,8 @@ export const AppProvider = ({ children }) => {
         deliveryStartTime,
         bodyOutTimes,
         apgar1MinParams,
-        apgar5MinParams: scoreData
+        apgar5MinParams: scoreData,
+        milestones // Included in payload for upcoming Convex Sync!
       });
     }
   };
@@ -139,24 +150,10 @@ export const AppProvider = ({ children }) => {
 
   return (
     <AppContext.Provider value={{
-      APGAR_CONFIG,
-      recordedTimeZone,
-      deliveryStartTime,
-      bodyOutTimes,
-      apgar1MinParams,
-      apgar5MinParams,
-      audioMode,
-      startDelivery,
-      stopDelivery,
-      markBodyOut,
-      saveApgarScore,
-      toggleAudioMode,
-      playChime,
-      speakTime,
-      manualModal,
-      openApgarModal,
-      closeManualModal,
-      syncError
+      APGAR_CONFIG, recordedTimeZone, deliveryStartTime, bodyOutTimes, apgar1MinParams,
+      apgar5MinParams, audioMode, milestones, startDelivery, stopDelivery, markBodyOut,
+      saveApgarScore, toggleAudioMode, toggleMilestone, playChime, speakTime, manualModal,
+      openApgarModal, closeManualModal, syncError
     }}>
       {children}
     </AppContext.Provider>

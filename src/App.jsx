@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AppProvider, useAppContext } from './context/AppProvider';
 import { Stopwatch } from './components/Stopwatch';
+import { MilestoneStrip } from './components/MilestoneStrip';
 import { AudioToggle } from './components/AudioToggle';
 import { BodyOutButton } from './components/BodyOutButton';
 import { SummaryScreen } from './components/SummaryScreen';
@@ -19,6 +20,9 @@ const MainTimerView = () => {
     <div className="w-full max-w-2xl flex flex-col items-center gap-2 sm:gap-4 px-2 sm:px-4 mx-auto shrink-0 relative z-20">
 
       <Stopwatch />
+      
+      {/* NEW: Added the Milestone Strip right here */}
+      <MilestoneStrip />
 
       {!isBirthFinished && (
         <div className="w-full flex flex-col gap-2 sm:gap-4 mt-2">
