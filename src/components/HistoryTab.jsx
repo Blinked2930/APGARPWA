@@ -113,6 +113,8 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
   const bodyOutMs = session.bodyOutTimes && session.bodyOutTimes.length > 0 ? session.bodyOutTimes[0] : null;
   const bodyOutTime = bodyOutMs ? formatTimeWithTz(bodyOutMs, tz) : null;
   const headToBodyDuration = bodyOutMs ? formatDuration(session.deliveryStartTime, bodyOutMs) : null;
+  
+  const m = session.milestones || {};
 
   const handleDelete = () => {
     setModalState({
@@ -135,7 +137,6 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
     });
   };
 
-  // FIX: This function now permanently displays the Edit/Add button even if data is missing
   const renderScores = (params, interval) => {
     const s = params?.scores;
     const hasScores = s && !params?.skipped && Object.keys(s).length > 0;
@@ -143,7 +144,7 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
     return (
       <div 
         className="flex flex-col gap-0.5 mt-3 w-full text-[11px] text-slate-600 dark:text-slate-300 bg-white/60 dark:bg-slate-800/80 p-3 rounded-xl shadow-inner border border-slate-100 dark:border-slate-700 cursor-default" 
-        onClick={(e) => e.stopPropagation()} // Prevents clicks from collapsing the card
+        onClick={(e) => e.stopPropagation()} 
       >
         {hasScores ? (
           <>
@@ -174,6 +175,21 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
     return `${params.total ?? '?'}/10`;
   };
 
+  // NEW: Compact Milestone Row component
+  const MilestoneRow = ({ label, ts, icon }) => {
+    if (!ts) return null;
+    return (
+      <div className="flex justify-between items-center bg-emerald-50/80 dark:bg-emerald-900/10 px-3 py-2 rounded-xl mb-1.5 border border-emerald-100/50 dark:border-emerald-800/30">
+        <span className="text-[10px] sm:text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
+          <span className="text-sm">{icon}</span> {label}
+        </span>
+        <span className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+          {formatTimeWithTz(ts, tz)} {getTimezoneBadge(tz)}
+        </span>
+      </div>
+    );
+  };
+
   return (
     <div className={`p-4 sm:p-6 rounded-[2rem] shadow-sm border-2 ${isOffline ? 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800' : 'bg-white border-slate-100 dark:bg-slate-800 dark:border-slate-700'} mb-4 relative overflow-hidden group`}>
       {isOffline && (
@@ -195,17 +211,26 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start mb-5 gap-3 border-b border-slate-100 dark:border-slate-700/50 pb-5">
-        <div>
+      {/* NEW: Pre-Delivery Milestones */}
+      {(m.rom || m.crown) && (
+        <div className="mb-3">
+          <MilestoneRow label="ROM" ts={m.rom} icon="💧" />
+          <MilestoneRow label="Crowning" ts={m.crown} icon="👑" />
+        </div>
+      )}
+
+      {/* Core Delivery Timers */}
+      <div className="flex flex-col sm:flex-row justify-between items-start mb-3 gap-3">
+        <div className="w-full sm:w-auto">
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between sm:justify-start sm:gap-2 bg-slate-50 dark:bg-slate-900/30 p-2 sm:p-0 sm:bg-transparent rounded-lg">
               <span className="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest w-16 sm:w-20">Head Out:</span>
               <span className="text-sm sm:text-base text-slate-700 dark:text-slate-300 font-semibold flex items-center">
                 {headOutTime} {getTimezoneBadge(tz)}
               </span>
             </div>
             {bodyOutTime && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between sm:justify-start sm:gap-2 bg-slate-50 dark:bg-slate-900/30 p-2 sm:p-0 sm:bg-transparent rounded-lg">
                 <span className="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest w-16 sm:w-20">Body Out:</span>
                 <span className="text-sm sm:text-base text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-2">
                   <span className="flex items-center">{bodyOutTime} {getTimezoneBadge(tz)}</span>
@@ -226,6 +251,16 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
         </div>
       </div>
 
+      {/* NEW: Post-Delivery Milestones */}
+      {(m.firstCry || m.placenta) && (
+        <div className="mb-4">
+          <MilestoneRow label="First Cry" ts={m.firstCry} icon="🗣️" />
+          <MilestoneRow label="Placenta" ts={m.placenta} icon="🩸" />
+        </div>
+      )}
+
+      <div className="w-full border-b border-slate-100 dark:border-slate-700/50 mb-4"></div>
+
       <div
         className="grid grid-cols-1 sm:grid-cols-2 gap-3 cursor-pointer"
         onClick={() => setExpanded(!expanded)}
@@ -236,7 +271,6 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
             {formatScoreTitle(session.apgar1MinParams)}
           </span>
           
-          {/* Dynamic Expansion Pill */}
           {!expanded && (
              <span className="text-[9px] text-slate-400 mt-2 uppercase tracking-widest bg-slate-200/50 dark:bg-slate-800 px-2 py-1 rounded-full flex items-center gap-1">
                <ChevronDown size={10} /> {session.apgar1MinParams?.skipped || !session.apgar1MinParams ? 'Tap to add' : 'Tap for details'}
@@ -257,7 +291,6 @@ const SessionCard = ({ session, isOffline, index, localQueue, setLocalQueue, del
             {formatScoreTitle(session.apgar5MinParams)}
           </span>
           
-          {/* Dynamic Expansion Pill */}
           {!expanded && (
              <span className="text-[9px] text-slate-400 mt-2 uppercase tracking-widest bg-slate-200/50 dark:bg-slate-800 px-2 py-1 rounded-full flex items-center gap-1">
                <ChevronDown size={10} /> {session.apgar5MinParams?.skipped || !session.apgar5MinParams ? 'Tap to add' : 'Tap for details'}
