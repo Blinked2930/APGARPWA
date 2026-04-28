@@ -39,24 +39,42 @@ export const InstallScreen = ({ onBypass }) => {
                                 <h3 className="font-black text-lg mb-4 text-center">iOS Installation</h3>
                                 <p className="text-xs font-bold text-rose-500 uppercase tracking-widest mb-4 text-center">Must be in Safari Browser</p>
                                 <ol className="space-y-4 text-sm font-medium text-slate-600 dark:text-slate-300">
-                                    <li className="flex items-center gap-3"><Share size={18} className="text-indigo-500 shrink-0"/> Tap the <b>Share</b> icon at the bottom of Safari.</li>
-                                    <li className="flex items-center gap-3"><PlusSquare size={18} className="text-indigo-500 shrink-0"/> Scroll down and tap <b>Add to Home Screen</b>.</li>
-                                    <li className="flex items-center gap-3"><ExternalLink size={18} className="text-indigo-500 shrink-0"/> Open the new app from your home screen.</li>
+                                    <li className="flex items-start gap-3">
+                                        <Share size={20} className="text-indigo-500 shrink-0 mt-0.5" /> 
+                                        <span className="leading-snug">Tap the <b>Share</b> icon at the bottom of Safari.</span>
+                                    </li>
+                                    <li className="flex items-start gap-3">
+                                        <PlusSquare size={20} className="text-indigo-500 shrink-0 mt-0.5" /> 
+                                        <span className="leading-snug">Scroll down and tap <b>Add to Home Screen</b>.</span>
+                                    </li>
+                                    <li className="flex items-start gap-3">
+                                        <ExternalLink size={20} className="text-indigo-500 shrink-0 mt-0.5" /> 
+                                        <span className="leading-snug">Open the new app from your home screen.</span>
+                                    </li>
                                 </ol>
                             </>
                         ) : (
                             <>
                                 <h3 className="font-black text-lg mb-4 text-center">Android Installation</h3>
                                 <ol className="space-y-4 text-sm font-medium text-slate-600 dark:text-slate-300">
-                                    <li className="flex items-center gap-3"><MoreVertical size={18} className="text-indigo-500 shrink-0"/> Tap the <b>3-dot menu</b> in the top right of Chrome.</li>
-                                    <li className="flex items-center gap-3"><PlusSquare size={18} className="text-indigo-500 shrink-0"/> Tap <b>Install App</b> or <b>Add to Home screen</b>.</li>
-                                    <li className="flex items-center gap-3"><ExternalLink size={18} className="text-indigo-500 shrink-0"/> Open the new app from your home screen.</li>
+                                    <li className="flex items-start gap-3">
+                                        <MoreVertical size={20} className="text-indigo-500 shrink-0 mt-0.5" /> 
+                                        <span className="leading-snug">Tap the <b>3-dot menu</b> in the top right of Chrome.</span>
+                                    </li>
+                                    <li className="flex items-start gap-3">
+                                        <PlusSquare size={20} className="text-indigo-500 shrink-0 mt-0.5" /> 
+                                        <span className="leading-snug">Tap <b>Install App</b> or <b>Add to Home screen</b>.</span>
+                                    </li>
+                                    <li className="flex items-start gap-3">
+                                        <ExternalLink size={20} className="text-indigo-500 shrink-0 mt-0.5" /> 
+                                        <span className="leading-snug">Open the new app from your home screen.</span>
+                                    </li>
                                 </ol>
                             </>
                         )}
                         <button 
                             onClick={() => setDevice(null)}
-                            className="mt-6 w-full py-3 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm"
+                            className="mt-6 w-full py-3 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors text-slate-600 dark:text-slate-300 font-bold text-sm"
                         >
                             Back
                         </button>
@@ -64,7 +82,6 @@ export const InstallScreen = ({ onBypass }) => {
                 )}
             </div>
 
-            {/* Hidden bypass for desktop testing */}
             <button 
                 onClick={onBypass}
                 className="mt-8 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 underline underline-offset-4"
