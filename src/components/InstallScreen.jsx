@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Smartphone, Apple, Share, PlusSquare, MoreVertical, ExternalLink } from 'lucide-react';
+import { Smartphone, Apple, Share, PlusSquare, MoreVertical, MoreHorizontal, ExternalLink } from 'lucide-react';
 
 export const InstallScreen = ({ onBypass }) => {
     const [device, setDevice] = useState(null);
@@ -40,8 +40,12 @@ export const InstallScreen = ({ onBypass }) => {
                                 <p className="text-xs font-bold text-rose-500 uppercase tracking-widest mb-4 text-center">Must be in Safari Browser</p>
                                 <ol className="space-y-4 text-sm font-medium text-slate-600 dark:text-slate-300">
                                     <li className="flex items-start gap-3">
+                                        <MoreHorizontal size={20} className="text-indigo-500 shrink-0 mt-0.5" /> 
+                                        <span className="leading-snug">Tap the <b>3-dot menu</b> in the bottom right corner of Safari.</span>
+                                    </li>
+                                    <li className="flex items-start gap-3">
                                         <Share size={20} className="text-indigo-500 shrink-0 mt-0.5" /> 
-                                        <span className="leading-snug">Tap the <b>Share</b> icon at the bottom of Safari.</span>
+                                        <span className="leading-snug">Tap the <b>Share</b> icon.</span>
                                     </li>
                                     <li className="flex items-start gap-3">
                                         <PlusSquare size={20} className="text-indigo-500 shrink-0 mt-0.5" /> 
@@ -49,7 +53,7 @@ export const InstallScreen = ({ onBypass }) => {
                                     </li>
                                     <li className="flex items-start gap-3">
                                         <ExternalLink size={20} className="text-indigo-500 shrink-0 mt-0.5" /> 
-                                        <span className="leading-snug">Open the new app from your home screen.</span>
+                                        <span className="leading-snug">Open <b>BirthTimer</b> from your home screen.</span>
                                     </li>
                                 </ol>
                             </>
@@ -67,7 +71,7 @@ export const InstallScreen = ({ onBypass }) => {
                                     </li>
                                     <li className="flex items-start gap-3">
                                         <ExternalLink size={20} className="text-indigo-500 shrink-0 mt-0.5" /> 
-                                        <span className="leading-snug">Open the new app from your home screen.</span>
+                                        <span className="leading-snug">Open <b>BirthTimer</b> from your home screen.</span>
                                     </li>
                                 </ol>
                             </>

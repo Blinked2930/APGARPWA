@@ -17,16 +17,18 @@ export const TutorialScreen = ({ onComplete }) => {
 
             <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 pb-12 shadow-2xl border border-slate-100 dark:border-slate-800 relative z-10 flex flex-col min-h-[520px]">
                 
+                {/* NEW: Sleek, Circular Back Button */}
                 {step > 1 && (
                     <button 
                         onClick={() => setStep(step - 1)} 
-                        className="absolute top-6 left-6 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-2"
+                        className="absolute top-6 left-6 w-10 h-10 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-full transition-all active:scale-95 z-20 shadow-sm"
+                        aria-label="Go Back"
                     >
-                        <ChevronLeft size={28} />
+                        <ChevronLeft size={22} strokeWidth={3} className="-ml-0.5" />
                     </button>
                 )}
 
-                <div className={`flex flex-col h-full ${step > 1 ? 'mt-8' : ''}`}>
+                <div className={`flex flex-col h-full ${step > 1 ? 'mt-10' : ''}`}>
                     {step === 1 && (
                         <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
                             <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-500 rounded-2xl flex items-center justify-center mb-6 shrink-0">
@@ -36,7 +38,7 @@ export const TutorialScreen = ({ onComplete }) => {
                             <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed flex-1">
                                 A completely offline, distraction-free tool designed to help you track APGAR intervals and delivery milestones in real-time.
                             </p>
-                            <button onClick={() => setStep(2)} className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg transition-all active:scale-95 shadow-lg shadow-indigo-500/20 shrink-0">
+                            <button onClick={() => setStep(2)} className="mt-auto w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg transition-all active:scale-95 shadow-lg shadow-indigo-500/20 shrink-0">
                                 Next
                             </button>
                         </div>
@@ -51,7 +53,7 @@ export const TutorialScreen = ({ onComplete }) => {
                             <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed flex-1">
                                 Use the quick-tap milestone buttons to log ROM, Crowning, First Cry, and Placenta delivery. Start the Head Out and Body Out timers to instantly track the progression of the delivery.
                             </p>
-                            <button onClick={() => setStep(3)} className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg transition-all active:scale-95 shadow-lg shadow-indigo-500/20 shrink-0">
+                            <button onClick={() => setStep(3)} className="mt-auto w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg transition-all active:scale-95 shadow-lg shadow-indigo-500/20 shrink-0">
                                 Next
                             </button>
                         </div>
@@ -66,7 +68,7 @@ export const TutorialScreen = ({ onComplete }) => {
                             <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed flex-1">
                                 Once the 'Body Out' timer is started, the app automatically tracks your 1-minute and 5-minute APGAR intervals. It will prompt you with voice announcements, chimes, and screen flashes when it's time to log the scores.
                             </p>
-                            <button onClick={() => setStep(4)} className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg transition-all active:scale-95 shadow-lg shadow-indigo-500/20 shrink-0">
+                            <button onClick={() => setStep(4)} className="mt-auto w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg transition-all active:scale-95 shadow-lg shadow-indigo-500/20 shrink-0">
                                 Next
                             </button>
                         </div>
@@ -84,7 +86,7 @@ export const TutorialScreen = ({ onComplete }) => {
                             <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700 flex-1">
                                 All records are stored directly on this physical device. If you clear your browser data or delete the app, the history is permanently destroyed.
                             </div>
-                            <button onClick={() => setStep(5)} className="w-full py-4 mt-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg transition-all active:scale-95 shadow-lg shadow-indigo-500/20 shrink-0">
+                            <button onClick={() => setStep(5)} className="mt-auto w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg transition-all active:scale-95 shadow-lg shadow-indigo-500/20 shrink-0">
                                 Next
                             </button>
                         </div>
@@ -104,7 +106,7 @@ export const TutorialScreen = ({ onComplete }) => {
                                     <li>You assume full responsibility for all medical decisions, timing verifications, and official hospital charting.</li>
                                 </ul>
                             </div>
-                            <button onClick={completeTutorial} className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg transition-all active:scale-95 flex justify-center items-center gap-2 shadow-lg shadow-indigo-500/20 shrink-0">
+                            <button onClick={completeTutorial} className="mt-auto w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg transition-all active:scale-95 flex justify-center items-center gap-2 shadow-lg shadow-indigo-500/20 shrink-0">
                                 <CheckCircle2 size={24} /> I Agree & Understand
                             </button>
                         </div>
