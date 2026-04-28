@@ -45,63 +45,72 @@ const MainTimerView = () => {
 
 const AppContent = () => {
   const [activeTab, setActiveTab] = useState('timer');
-  const [isStandalone, setIsStandalone] = useState(true); // Assume true until proven false
-  const [tutorialDone, setTutorialDone] = useState(true); // Assume true until proven false
+  const [isStandalone, setIsStandalone] = useState(true); 
+  const [tutorialDone, setTutorialDone] = useState(true); 
+  const [settingsTutorialDone, setSettingsTutorialDone] = useState(true); // NEW: Settings Walkthrough State
   const [isChecking, setIsChecking] = useState(true);
 
-  // Core Routing Logic: Check PWA status and Tutorial status on mount
   useEffect(() => {
-    // 1. Check if running as a PWA (installed)
     const checkStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
     setIsStandalone(checkStandalone);
 
-    // 2. Check if tutorial is completed
     const hasFinishedTutorial = localStorage.getItem('tutorialCompleted') === 'true';
     setTutorialDone(hasFinishedTutorial);
+
+    const hasFinishedSettings = localStorage.getItem('settingsTutorialCompleted') === 'true';
+    setSettingsTutorialDone(hasFinishedSettings);
     
     setIsChecking(false);
   }, []);
 
-  if (isChecking) return null; // Prevent flash of wrong screen
+  if (isChecking) return null; 
 
-  // Route 1: Not installed yet (force installation)
   if (!isStandalone) {
       return <InstallScreen onBypass={() => setIsStandalone(true)} />;
   }
 
-  // Route 2: Installed, but hasn't read the legal disclaimer
   if (isStandalone && !tutorialDone) {
       return <TutorialScreen onComplete={() => setTutorialDone(true)} />;
   }
 
-  // Route 3: Fully installed and tutorial completed -> Main App
+  // Calculate if we are currently in the forced Walkthrough Mode
+  const isWalkthroughMode = isStandalone && tutorialDone && !settingsTutorialDone;
+  const currentTab = isWalkthroughMode ? 'settings' : activeTab;
+
   return (
     <div className="h-[100dvh] w-full text-slate-900 dark:text-slate-100 font-sans flex flex-col selection:bg-transparent transition-colors bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
 
       <div className="absolute top-0 inset-x-0 h-48 sm:h-64 bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] pointer-events-none z-0"></div>
 
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden z-10 relative">
-        {activeTab === 'timer' && (
+        {currentTab === 'timer' && (
           <div className="flex flex-col min-h-full w-full">
             <div className="flex-1 min-h-[max(env(safe-area-inset-top),1rem)] shrink-0 pointer-events-none"></div>
             <MainTimerView />
             <div className="flex-1 min-h-[calc(110px+env(safe-area-inset-bottom))] shrink-0 pointer-events-none"></div>
           </div>
         )}
-        {activeTab === 'history' && (
+        {currentTab === 'history' && (
           <div className="min-h-full w-full pt-[max(env(safe-area-inset-top),2rem)] pb-[calc(110px+env(safe-area-inset-bottom))]">
             <HistoryTab />
           </div>
         )}
-        {activeTab === 'settings' && (
+        {currentTab === 'settings' && (
           <div className="min-h-full w-full pt-[max(env(safe-area-inset-top),2rem)] pb-[calc(110px+env(safe-area-inset-bottom))]">
-            <SettingsTab />
+            <SettingsTab 
+                isWalkthrough={isWalkthroughMode}
+                onCompleteWalkthrough={() => {
+                    localStorage.setItem('settingsTutorialCompleted', 'true');
+                    setSettingsTutorialDone(true);
+                    setActiveTab('timer'); // Jump back to the timer!
+                }}
+            />
           </div>
         )}
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="absolute bottom-0 inset-x-0 h-[80px] bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200/50 dark:border-white/5 p-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] flex justify-center gap-2 sm:gap-4 z-40">
+      {/* Bottom Navigation (Disabled and dimmed if in walkthrough mode) */}
+      <div className={`absolute bottom-0 inset-x-0 h-[80px] bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200/50 dark:border-white/5 p-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] flex justify-center gap-2 sm:gap-4 transition-opacity duration-500 ${isWalkthroughMode ? 'opacity-30 pointer-events-none z-30' : 'z-40'}`}>
         <button onClick={() => setActiveTab('timer')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold transition-all active:scale-95 touch-manipulation gap-1 ${activeTab === 'timer' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}>
           <Clock size={22} strokeWidth={2.5} />
           <span className="text-[10px] sm:text-xs uppercase tracking-wider">Active</span>
