@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'APGAR Midwife App',
-        short_name: 'APGAR App',
+        name: 'BirthTimer',
+        short_name: 'BirthTimer',
         description: 'Timers and APGAR scoring for midwives',
         theme_color: '#000000',
         background_color: '#000000',
