@@ -39,8 +39,8 @@ export function useAudio() {
             window.speechSynthesis.cancel(); // Clear any pending speech
             const utterance = new SpeechSynthesisUtterance('ding');
             utterance.volume = 1;
-            utterance.rate = 1.5; // Speed it up so it sounds more like a sound effect
-            utterance.pitch = 1.5; // Make it a bit higher
+            utterance.rate = 0.9; // Slower, more natural speed
+            utterance.pitch = 0.9; // Lower, calmer pitch
             window.speechSynthesis.speak(utterance);
         }
 
@@ -54,6 +54,9 @@ export function useAudio() {
         const ctx = audioCtxRef.current;
         if (ctx.state === 'suspended') ctx.resume();
 
+        // Delay the Web Audio API by 150ms to let the Text-To-Speech engine catch up
+        const startTime = ctx.currentTime + 0.15;
+
         const frequencies = [523.25, 659.25, 783.99]; 
 
         frequencies.forEach((freq, i) => {
@@ -63,15 +66,16 @@ export function useAudio() {
           osc.type = 'sine';
           osc.frequency.value = freq;
 
-          gainNode.gain.setValueAtTime(0, ctx.currentTime);
-          gainNode.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.1 + (i * 0.05)); 
-          gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5 + (i * 0.2));
+          // Use the delayed startTime instead of ctx.currentTime
+          gainNode.gain.setValueAtTime(0, startTime);
+          gainNode.gain.linearRampToValueAtTime(0.15, startTime + 0.1 + (i * 0.05)); 
+          gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + 2.5 + (i * 0.2));
 
           osc.connect(gainNode);
           gainNode.connect(ctx.destination);
 
-          osc.start(ctx.currentTime);
-          osc.stop(ctx.currentTime + 3.0);
+          osc.start(startTime);
+          osc.stop(startTime + 3.0);
         });
     } catch (e) {
         console.error("Chime failed", e);
