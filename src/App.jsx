@@ -11,7 +11,8 @@ import { HistoryTab } from './components/HistoryTab';
 import { SettingsTab } from './components/SettingsTab';
 import { InstallScreen } from './components/InstallScreen';
 import { TutorialScreen } from './components/TutorialScreen';
-import { Clock, BookCopy, Settings as SettingsIcon, ArrowDown, ChevronRight } from 'lucide-react';
+import { UiTour } from './components/UiTour';
+import { Clock, BookCopy, Settings as SettingsIcon, ChevronRight } from 'lucide-react';
 
 const MainTimerView = () => {
   const { bodyOutTimes, apgar5MinParams, showMilestones } = useAppContext();
@@ -41,7 +42,7 @@ const AppContent = () => {
   const [showBridge, setShowBridge] = useState(false);
 
   useEffect(() => {
-    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
     const tutorialDone = localStorage.getItem('tutorialCompleted') === 'true';
     const settingsDone = localStorage.getItem('settingsTutorialCompleted') === 'true';
     const uiTourDone = localStorage.getItem('uiTourCompleted') === 'true';
@@ -75,7 +76,7 @@ const AppContent = () => {
         </div>
         <h1 className="text-4xl font-black text-white mb-4">Almost Ready</h1>
         <p className="text-slate-400 text-lg mb-10 max-w-xs">Now let's quickly customize your BirthTimer settings to fit your workflow.</p>
-        <button onClick={() => setShowBridge(false)} className="w-full max-w-xs py-5 rounded-2xl bg-indigo-600 text-white font-black text-xl flex items-center justify-center gap-2">
+        <button onClick={() => setShowBridge(false)} className="w-full max-w-xs py-5 rounded-2xl bg-indigo-600 text-white font-black text-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-indigo-500/20">
             Setup Settings <ChevronRight />
         </button>
     </div>
@@ -97,39 +98,24 @@ const AppContent = () => {
         }} />}
       </div>
 
-      {/* UI TOUR POPUPS */}
-      {isUiTour && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex flex-col justify-end p-6 pb-32">
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-2xl animate-in slide-in-from-bottom-4">
-                <h3 className="text-xl font-black mb-2">
-                    {flow.uiTourStep === 1 ? "Active Timer" : flow.uiTourStep === 2 ? "Birth History" : "Access Settings Again"}
-                </h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-6">
-                    {flow.uiTourStep === 1 ? "This is where you'll spend your time during a delivery." : 
-                     flow.uiTourStep === 2 ? "Review all your past records and timestamps here." : 
-                     "You can always adjust your audio and visual preferences right here."}
-                </p>
-                <button onClick={() => flow.uiTourStep === 3 ? finishUiTour() : setFlow({...flow, uiTourStep: flow.uiTourStep + 1})} className="w-full py-4 rounded-xl bg-indigo-600 text-white font-bold">
-                    {flow.uiTourStep === 3 ? "Start Using App" : "Next"}
-                </button>
-            </div>
-            <div className={`flex justify-center mt-4 text-white animate-bounce ${flow.uiTourStep === 1 ? 'mr-[66%]' : flow.uiTourStep === 2 ? '' : 'ml-[66%]'}`}>
-                <ArrowDown size={40} strokeWidth={3} />
-            </div>
-        </div>
-      )}
+      {/* NEW: Clean, componentized UI Tour */}
+      <UiTour 
+        step={flow.uiTourStep} 
+        onNext={() => setFlow({...flow, uiTourStep: flow.uiTourStep + 1})} 
+        onFinish={finishUiTour} 
+      />
 
-      {/* Navigation */}
+      {/* Bottom Navigation */}
       <div className={`absolute bottom-0 inset-x-0 h-[80px] bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200/50 p-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] flex justify-center gap-2 z-40 ${(isSettingsTour || isUiTour) ? 'pointer-events-none' : ''}`}>
-        <button onClick={() => setActiveTab('timer')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold gap-1 ${currentTab === 'timer' ? 'text-indigo-600 bg-indigo-50 border border-indigo-100' : 'text-slate-400'}`}>
+        <button onClick={() => setActiveTab('timer')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold gap-1 transition-all active:scale-95 touch-manipulation ${currentTab === 'timer' ? 'text-indigo-600 bg-indigo-50 border border-indigo-100' : 'text-slate-400'}`}>
           <Clock size={22} strokeWidth={2.5} />
           <span className="text-[10px] uppercase tracking-wider">Active</span>
         </button>
-        <button onClick={() => setActiveTab('history')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold gap-1 ${currentTab === 'history' ? 'text-indigo-600 bg-indigo-50 border border-indigo-100' : 'text-slate-400'}`}>
+        <button onClick={() => setActiveTab('history')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold gap-1 transition-all active:scale-95 touch-manipulation ${currentTab === 'history' ? 'text-indigo-600 bg-indigo-50 border border-indigo-100' : 'text-slate-400'}`}>
           <BookCopy size={22} strokeWidth={2.5} />
           <span className="text-[10px] uppercase tracking-wider">History</span>
         </button>
-        <button onClick={() => setActiveTab('settings')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold gap-1 ${currentTab === 'settings' ? 'text-indigo-600 bg-indigo-50 border border-indigo-100' : 'text-slate-400'}`}>
+        <button onClick={() => setActiveTab('settings')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold gap-1 transition-all active:scale-95 touch-manipulation ${currentTab === 'settings' ? 'text-indigo-600 bg-indigo-50 border border-indigo-100' : 'text-slate-400'}`}>
           <SettingsIcon size={22} strokeWidth={2.5} />
           <span className="text-[10px] uppercase tracking-wider">Settings</span>
         </button>
