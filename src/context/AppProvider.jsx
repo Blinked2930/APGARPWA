@@ -43,9 +43,14 @@ export const AppProvider = ({ children }) => {
     return localStorage.getItem('audioMode') || 'VOICE';
   });
 
-  // NEW: Settings State
   const [visualFlash, setVisualFlash] = useState(() => {
     const saved = localStorage.getItem('visualFlash');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  // NEW: Milestone Strip Toggle State
+  const [showMilestones, setShowMilestones] = useState(() => {
+    const saved = localStorage.getItem('showMilestones');
     return saved !== null ? JSON.parse(saved) : true;
   });
 
@@ -56,6 +61,7 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => { localStorage.setItem('audioMode', audioMode); }, [audioMode]);
   useEffect(() => { localStorage.setItem('visualFlash', JSON.stringify(visualFlash)); }, [visualFlash]);
+  useEffect(() => { localStorage.setItem('showMilestones', JSON.stringify(showMilestones)); }, [showMilestones]); // Save to local storage
 
   useEffect(() => {
     localStorage.setItem('birthMilestones', JSON.stringify(milestones));
@@ -94,6 +100,7 @@ export const AppProvider = ({ children }) => {
   };
 
   const toggleVisualFlash = () => setVisualFlash(prev => !prev);
+  const toggleShowMilestones = () => setShowMilestones(prev => !prev); // The toggle action
 
   const toggleMilestone = (key) => {
     setMilestones(prev => ({
@@ -163,8 +170,8 @@ export const AppProvider = ({ children }) => {
   return (
     <AppContext.Provider value={{
       APGAR_CONFIG, recordedTimeZone, deliveryStartTime, bodyOutTimes, apgar1MinParams,
-      apgar5MinParams, audioMode, milestones, visualFlash, startDelivery, stopDelivery, markBodyOut,
-      saveApgarScore, toggleAudioMode, toggleVisualFlash, toggleMilestone, playChime, speakTime, manualModal,
+      apgar5MinParams, audioMode, milestones, visualFlash, showMilestones, startDelivery, stopDelivery, markBodyOut,
+      saveApgarScore, toggleAudioMode, toggleVisualFlash, toggleShowMilestones, toggleMilestone, playChime, speakTime, manualModal,
       openApgarModal, closeManualModal
     }}>
       {children}

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useAppContext } from '../context/AppProvider';
-import { Zap, Settings as SettingsIcon } from 'lucide-react';
+import { Zap, Settings as SettingsIcon, CheckSquare } from 'lucide-react';
 
 export const SettingsTab = () => {
-    const { visualFlash, toggleVisualFlash } = useAppContext();
+    const { visualFlash, toggleVisualFlash, showMilestones, toggleShowMilestones } = useAppContext();
 
     return (
         <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 pb-32">
@@ -24,19 +24,44 @@ export const SettingsTab = () => {
                         </div>
                         <div>
                             <h3 className="text-lg font-black text-slate-800 dark:text-slate-100 mb-1">Visual Screen Flash</h3>
-                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 max-w-[250px]">
+                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 max-w-[250px] sm:max-w-none">
                                 Briefly flashes the screen every 30 seconds as a visual backup to the audio cues.
                             </p>
                         </div>
                     </div>
 
-                    {/* Custom Toggle Switch */}
                     <button 
                         onClick={toggleVisualFlash}
                         className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${visualFlash ? 'bg-indigo-500' : 'bg-slate-200 dark:bg-slate-700'}`}
                     >
                         <span 
                             className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${visualFlash ? 'translate-x-6' : 'translate-x-0'}`} 
+                        />
+                    </button>
+                </div>
+
+                <div className="w-full border-b border-slate-100 dark:border-slate-700/50 my-6"></div>
+
+                {/* Milestone Strips Toggle */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-start gap-4">
+                        <div className={`p-3 rounded-xl mt-1 ${showMilestones ? 'bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-slate-50 text-slate-400 dark:bg-slate-900/50'}`}>
+                            <CheckSquare size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-black text-slate-800 dark:text-slate-100 mb-1">Milestone Trackers</h3>
+                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 max-w-[250px] sm:max-w-none">
+                                Show quick-tap buttons to log the exact times for ROM, Crown, First Cry, and Placenta.
+                            </p>
+                        </div>
+                    </div>
+
+                    <button 
+                        onClick={toggleShowMilestones}
+                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${showMilestones ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'}`}
+                    >
+                        <span 
+                            className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${showMilestones ? 'translate-x-6' : 'translate-x-0'}`} 
                         />
                     </button>
                 </div>

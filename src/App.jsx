@@ -12,14 +12,15 @@ import { SettingsTab } from './components/SettingsTab';
 import { Clock, BookCopy, Settings as SettingsIcon } from 'lucide-react';
 
 const MainTimerView = () => {
-  const { bodyOutTimes, apgar5MinParams } = useAppContext();
+  const { bodyOutTimes, apgar5MinParams, showMilestones } = useAppContext();
 
   const isBirthFinished = !!apgar5MinParams;
 
   return (
     <div className="w-full max-w-2xl flex flex-col items-center gap-2 sm:gap-4 px-2 sm:px-4 mx-auto shrink-0 relative z-20 pt-2">
 
-      <MilestoneStrip keys={['rom', 'crown']} />
+      {/* Conditionally render the top strips */}
+      {showMilestones && <MilestoneStrip keys={['rom', 'crown']} />}
 
       <Stopwatch />
 
@@ -37,8 +38,9 @@ const MainTimerView = () => {
         </div>
       )}
 
+      {/* Conditionally render the bottom strips */}
       <div className="w-full">
-         <MilestoneStrip keys={['firstCry', 'placenta']} />
+         {showMilestones && <MilestoneStrip keys={['firstCry', 'placenta']} />}
       </div>
 
       {isBirthFinished && <SummaryScreen />}
