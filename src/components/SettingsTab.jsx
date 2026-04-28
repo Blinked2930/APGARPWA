@@ -1,9 +1,9 @@
 import React from 'react';
 import { useAppContext } from '../context/AppProvider';
-import { Zap, Settings as SettingsIcon, CheckSquare } from 'lucide-react';
+import { Zap, Settings as SettingsIcon, CheckSquare, Bot } from 'lucide-react';
 
 export const SettingsTab = () => {
-    const { visualFlash, toggleVisualFlash, showMilestones, toggleShowMilestones } = useAppContext();
+    const { visualFlash, toggleVisualFlash, showMilestones, toggleShowMilestones, robotDingEnabled, toggleRobotDing } = useAppContext();
 
     return (
         <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 pb-32">
@@ -36,6 +36,32 @@ export const SettingsTab = () => {
                     >
                         <span 
                             className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${visualFlash ? 'translate-x-6' : 'translate-x-0'}`} 
+                        />
+                    </button>
+                </div>
+
+                <div className="w-full border-b border-slate-100 dark:border-slate-700/50 my-6"></div>
+
+                {/* Robot Voice Fail-Safe Toggle */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-start gap-4">
+                        <div className={`p-3 rounded-xl mt-1 ${robotDingEnabled ? 'bg-amber-50 text-amber-500 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-slate-50 text-slate-400 dark:bg-slate-900/50'}`}>
+                            <Bot size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-black text-slate-800 dark:text-slate-100 mb-1">Audio Fail-Safe</h3>
+                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 max-w-[250px] sm:max-w-none">
+                                Plays a synthesized voice saying "ding" alongside the musical chime. This guarantees a sound plays even if the phone's physical mute switch is turned on.
+                            </p>
+                        </div>
+                    </div>
+
+                    <button 
+                        onClick={toggleRobotDing}
+                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${robotDingEnabled ? 'bg-amber-500' : 'bg-slate-200 dark:bg-slate-700'}`}
+                    >
+                        <span 
+                            className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${robotDingEnabled ? 'translate-x-6' : 'translate-x-0'}`} 
                         />
                     </button>
                 </div>

@@ -32,14 +32,13 @@ export function useAudio() {
     }
   }, []);
 
-  const playChime = useCallback(() => {
+  const playChime = useCallback((useRobotDing = true) => {
     try {
-        // 1. Play the "Robot Ding" (Bypasses Mute Switch)
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel(); // Clear any pending speech
+        // 1. Play the "Robot Ding" ONLY if enabled in settings
+        if (useRobotDing && 'speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); 
             const utterance = new SpeechSynthesisUtterance('ding');
             
-            // Attempt to find a male/deeper voice if the browser has it loaded
             const voices = window.speechSynthesis.getVoices();
             const deepVoice = voices.find(v => v.name.includes('Daniel') || v.name.includes('Alex') || v.name.includes('Male') || v.name.includes('Guy'));
             if (deepVoice) {
@@ -47,12 +46,12 @@ export function useAudio() {
             }
 
             utterance.volume = 1;
-            utterance.rate = 0.5; // Much slower
-            utterance.pitch = 0.2; // Much deeper
+            utterance.rate = 0.5; 
+            utterance.pitch = 0.2; 
             window.speechSynthesis.speak(utterance);
         }
 
-        // 2. Play the "Pretty Ding" (Respects Mute Switch)
+        // 2. Play the "Pretty Ding" 
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         
         if (!audioCtxRef.current) {
@@ -62,9 +61,7 @@ export function useAudio() {
         const ctx = audioCtxRef.current;
         if (ctx.state === 'suspended') ctx.resume();
 
-        // Delay the Web Audio API by 150ms to let the Text-To-Speech engine catch up
         const startTime = ctx.currentTime + 0.15;
-
         const frequencies = [523.25, 659.25, 783.99]; 
 
         frequencies.forEach((freq, i) => {
@@ -74,7 +71,6 @@ export function useAudio() {
           osc.type = 'sine';
           osc.frequency.value = freq;
 
-          // Use the delayed startTime instead of ctx.currentTime
           gainNode.gain.setValueAtTime(0, startTime);
           gainNode.gain.linearRampToValueAtTime(0.15, startTime + 0.1 + (i * 0.05)); 
           gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + 2.5 + (i * 0.2));
