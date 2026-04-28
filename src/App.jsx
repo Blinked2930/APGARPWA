@@ -17,12 +17,15 @@ const MainTimerView = () => {
   const isBirthFinished = !!apgar5MinParams;
 
   return (
-    <div className="w-full max-w-2xl flex flex-col items-center gap-2 sm:gap-4 px-2 sm:px-4 mx-auto shrink-0 relative z-20">
+    <div className="w-full max-w-2xl flex flex-col items-center gap-2 sm:gap-4 px-2 sm:px-4 mx-auto shrink-0 relative z-20 pt-2">
 
+      {/* 1. Pre-Delivery */}
+      <MilestoneStrip keys={['rom', 'crown']} />
+
+      {/* 2. Head Out */}
       <Stopwatch />
-      
-      <MilestoneStrip />
 
+      {/* 3. Body Out (Hides after birth is fully logged) */}
       {!isBirthFinished && (
         <div className="w-full flex flex-col gap-2 sm:gap-4 mt-2">
           <div className="w-full grid grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-4">
@@ -37,6 +40,11 @@ const MainTimerView = () => {
         </div>
       )}
 
+      {/* 4. Post-Delivery (Stays visible so they can log placenta after APGAR) */}
+      <div className="w-full">
+         <MilestoneStrip keys={['firstCry', 'placenta']} />
+      </div>
+
       {isBirthFinished && <SummaryScreen />}
 
       <ApgarOrchestrator />
@@ -50,20 +58,17 @@ const AppContent = () => {
   return (
     <div className="h-[100dvh] w-full text-slate-900 dark:text-slate-100 font-sans flex flex-col selection:bg-transparent transition-colors bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
 
-      {/* Decorative ambient background glows */}
       <div className="absolute top-0 inset-x-0 h-48 sm:h-64 bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] pointer-events-none z-0"></div>
 
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden z-10 relative">
         
         {activeTab === 'timer' ? (
-          // Active Tab manages its own flex-centering layout
           <div className="flex flex-col min-h-full w-full">
             <div className="flex-1 min-h-[max(env(safe-area-inset-top),1rem)] shrink-0 pointer-events-none"></div>
             <MainTimerView />
             <div className="flex-1 min-h-[calc(110px+env(safe-area-inset-bottom))] shrink-0 pointer-events-none"></div>
           </div>
         ) : (
-          // History Tab gets a simple unconstrained block so it can scroll infinitely
           <div className="min-h-full w-full pt-[max(env(safe-area-inset-top),2rem)] pb-[calc(110px+env(safe-area-inset-bottom))]">
             <HistoryTab />
           </div>
@@ -71,7 +76,6 @@ const AppContent = () => {
 
       </div>
 
-      {/* Bottom Navigation */}
       <div className="absolute bottom-0 inset-x-0 h-[80px] bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200/50 dark:border-white/5 p-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] flex justify-center gap-4 z-40">
         <button
           onClick={() => setActiveTab('timer')}

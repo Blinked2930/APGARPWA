@@ -2,16 +2,19 @@ import React, { useState } from 'react';
 import { useAppContext } from '../context/AppProvider';
 import { AlertTriangle } from 'lucide-react';
 
-export const MilestoneStrip = () => {
+export const MilestoneStrip = ({ keys }) => {
     const { milestones, toggleMilestone } = useAppContext();
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, btn: null });
 
-    const buttons = [
+    const allButtons = [
         { id: 'rom', label: 'ROM', icon: '💧' },
         { id: 'crown', label: 'Crown', icon: '👑' },
         { id: 'firstCry', label: 'First Cry', icon: '🗣️' },
         { id: 'placenta', label: 'Placenta', icon: '🩸' }
     ];
+
+    // Filter the buttons based on the keys passed in (if any)
+    const buttons = keys ? allButtons.filter(b => keys.includes(b.id)) : allButtons;
 
     const formatTime = (ts) => {
         const d = new Date(ts);
@@ -22,10 +25,8 @@ export const MilestoneStrip = () => {
         const isRecorded = !!milestones[btn.id];
         
         if (isRecorded) {
-            // Open the custom modal instead of the native window.confirm
             setConfirmModal({ isOpen: true, btn });
         } else {
-            // If it's empty, just record it immediately
             toggleMilestone(btn.id);
         }
     };
@@ -64,7 +65,6 @@ export const MilestoneStrip = () => {
                 })}
             </div>
 
-            {/* Custom Confirmation Modal */}
             {confirmModal.isOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm">
                     <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 sm:p-8 max-w-sm w-full shadow-2xl relative overflow-hidden border border-slate-100 dark:border-slate-800">
