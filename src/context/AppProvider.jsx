@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAudio } from '../hooks/useAudio';
 import { useWakeLock } from '../hooks/useWakeLock';
-import { useOfflineSync } from '../hooks/useOfflineSync';
 
 const AppContext = createContext();
 
@@ -48,7 +47,6 @@ export const AppProvider = ({ children }) => {
 
   const { initAudio, playChime, speakTime } = useAudio();
   const { requestWakeLock, releaseWakeLock } = useWakeLock();
-  const { queueSession, syncError } = useOfflineSync();
 
   useEffect(() => { localStorage.setItem('audioMode', audioMode); }, [audioMode]);
 
@@ -103,17 +101,21 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // FIX: stopDelivery now takes a boolean. If true, it pushes everything to Convex!
   const stopDelivery = (saveToHistory = false) => {
     if (saveToHistory && deliveryStartTime) {
-        queueSession({
+        // Save directly to the local history array
+        const newSession = {
+            id: Date.now().toString(), // Give it a unique ID for React keys
             recordedTimeZone,
             deliveryStartTime,
             bodyOutTimes,
             apgar1MinParams,
             apgar5MinParams,
-            milestones // Everything is captured!
-        });
+            milestones
+        };
+        const existingHistory = JSON.parse(localStorage.getItem('localBirthHistory') || '[]');
+        existingHistory.unshift(newSession); // Add newest birth to the top
+        localStorage.setItem('localBirthHistory', JSON.stringify(existingHistory));
     }
 
     setDeliveryStartTime(null);
@@ -144,7 +146,6 @@ export const AppProvider = ({ children }) => {
       setApgar1MinParams(scoreData);
     } else if (interval === 5) {
       setApgar5MinParams(scoreData);
-      // FIX: Removed queueSession from here so it doesn't fire prematurely!
     }
   };
 
@@ -156,7 +157,7 @@ export const AppProvider = ({ children }) => {
       APGAR_CONFIG, recordedTimeZone, deliveryStartTime, bodyOutTimes, apgar1MinParams,
       apgar5MinParams, audioMode, milestones, startDelivery, stopDelivery, markBodyOut,
       saveApgarScore, toggleAudioMode, toggleMilestone, playChime, speakTime, manualModal,
-      openApgarModal, closeManualModal, syncError
+      openApgarModal, closeManualModal
     }}>
       {children}
     </AppContext.Provider>

@@ -21,7 +21,6 @@ const MainTimerView = () => {
 
       <Stopwatch />
       
-      {/* NEW: Added the Milestone Strip right here */}
       <MilestoneStrip />
 
       {!isBirthFinished && (
@@ -54,7 +53,6 @@ const AppContent = () => {
       {/* Decorative ambient background glows */}
       <div className="absolute top-0 inset-x-0 h-48 sm:h-64 bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] pointer-events-none z-0"></div>
 
-      {/* FIX: Removed 'flex flex-col' from here. It is now a pure scrolling block. */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden z-10 relative">
         
         {activeTab === 'timer' ? (
