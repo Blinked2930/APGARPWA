@@ -16,16 +16,11 @@ export function useAudio() {
           ctx.resume();
         }
 
-        // THE FIX: Play a 1-millisecond silent sound.
-        // This tricks iOS Safari into permanently unlocking the Web Audio API 
-        // so it allows our chimes to play during setIntervals later on.
-        const osc = ctx.createOscillator();
-        const gainNode = ctx.createGain();
-        gainNode.gain.value = 0; // 100% silent
-        osc.connect(gainNode);
-        gainNode.connect(ctx.destination);
-        osc.start(0);
-        osc.stop(ctx.currentTime + 0.001);
+        const buffer = ctx.createBuffer(1, 1, 22050);
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(ctx.destination);
+        source.start(0);
 
         if ('speechSynthesis' in window) {
             const utterance = new SpeechSynthesisUtterance('');
@@ -39,6 +34,17 @@ export function useAudio() {
 
   const playChime = useCallback(() => {
     try {
+        // 1. Play the "Robot Ding" (Bypasses Mute Switch)
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); // Clear any pending speech
+            const utterance = new SpeechSynthesisUtterance('ding');
+            utterance.volume = 1;
+            utterance.rate = 1.5; // Speed it up so it sounds more like a sound effect
+            utterance.pitch = 1.5; // Make it a bit higher
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // 2. Play the "Pretty Ding" (Respects Mute Switch)
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         
         if (!audioCtxRef.current) {
@@ -64,7 +70,7 @@ export function useAudio() {
           osc.connect(gainNode);
           gainNode.connect(ctx.destination);
 
-          osc.start();
+          osc.start(ctx.currentTime);
           osc.stop(ctx.currentTime + 3.0);
         });
     } catch (e) {
@@ -87,16 +93,13 @@ export function useAudio() {
             if (text === '') text = 'Started';
         }
 
-        // Phonetic fix: Replace "APGAR" with "Apgar" and adjust spelling if needed
-        // Browsers usually read capitalized acronyms like "A.P.G.A.R." 
-        // We use lowercase with a capitalized first letter to trigger word-pronunciation.
         text = text.replace(/APGAR/g, "Apgar");
 
         window.speechSynthesis.cancel();
         
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.volume = 1;
-        utterance.rate = 0.9; // Slightly slower for clarity
+        utterance.rate = 0.9;
         window.speechSynthesis.speak(utterance);
     } catch(e) {
         console.error("Speech failed", e);

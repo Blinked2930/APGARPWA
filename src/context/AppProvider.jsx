@@ -43,12 +43,19 @@ export const AppProvider = ({ children }) => {
     return localStorage.getItem('audioMode') || 'VOICE';
   });
 
+  // NEW: Settings State
+  const [visualFlash, setVisualFlash] = useState(() => {
+    const saved = localStorage.getItem('visualFlash');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
   const [manualModal, setManualModal] = useState(null);
 
   const { initAudio, playChime, speakTime } = useAudio();
   const { requestWakeLock, releaseWakeLock } = useWakeLock();
 
   useEffect(() => { localStorage.setItem('audioMode', audioMode); }, [audioMode]);
+  useEffect(() => { localStorage.setItem('visualFlash', JSON.stringify(visualFlash)); }, [visualFlash]);
 
   useEffect(() => {
     localStorage.setItem('birthMilestones', JSON.stringify(milestones));
@@ -86,6 +93,8 @@ export const AppProvider = ({ children }) => {
     setAudioMode(prev => prev === 'MUTE' ? 'VOICE' : prev === 'VOICE' ? 'CHIME' : 'MUTE');
   };
 
+  const toggleVisualFlash = () => setVisualFlash(prev => !prev);
+
   const toggleMilestone = (key) => {
     setMilestones(prev => ({
       ...prev,
@@ -103,9 +112,8 @@ export const AppProvider = ({ children }) => {
 
   const stopDelivery = (saveToHistory = false) => {
     if (saveToHistory && deliveryStartTime) {
-        // Save directly to the local history array
         const newSession = {
-            id: Date.now().toString(), // Give it a unique ID for React keys
+            id: Date.now().toString(), 
             recordedTimeZone,
             deliveryStartTime,
             bodyOutTimes,
@@ -114,7 +122,7 @@ export const AppProvider = ({ children }) => {
             milestones
         };
         const existingHistory = JSON.parse(localStorage.getItem('localBirthHistory') || '[]');
-        existingHistory.unshift(newSession); // Add newest birth to the top
+        existingHistory.unshift(newSession); 
         localStorage.setItem('localBirthHistory', JSON.stringify(existingHistory));
     }
 
@@ -155,8 +163,8 @@ export const AppProvider = ({ children }) => {
   return (
     <AppContext.Provider value={{
       APGAR_CONFIG, recordedTimeZone, deliveryStartTime, bodyOutTimes, apgar1MinParams,
-      apgar5MinParams, audioMode, milestones, startDelivery, stopDelivery, markBodyOut,
-      saveApgarScore, toggleAudioMode, toggleMilestone, playChime, speakTime, manualModal,
+      apgar5MinParams, audioMode, milestones, visualFlash, startDelivery, stopDelivery, markBodyOut,
+      saveApgarScore, toggleAudioMode, toggleVisualFlash, toggleMilestone, playChime, speakTime, manualModal,
       openApgarModal, closeManualModal
     }}>
       {children}

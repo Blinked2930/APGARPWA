@@ -8,24 +8,21 @@ import { SummaryScreen } from './components/SummaryScreen';
 import { ApgarOrchestrator } from './components/ApgarOrchestrator';
 import { ApgarTimer } from './components/ApgarTimer';
 import { HistoryTab } from './components/HistoryTab';
-import { Clock, BookCopy } from 'lucide-react';
+import { SettingsTab } from './components/SettingsTab';
+import { Clock, BookCopy, Settings as SettingsIcon } from 'lucide-react';
 
 const MainTimerView = () => {
   const { bodyOutTimes, apgar5MinParams } = useAppContext();
 
-  // Hide active controls if 5-Min APGAR is completed.
   const isBirthFinished = !!apgar5MinParams;
 
   return (
     <div className="w-full max-w-2xl flex flex-col items-center gap-2 sm:gap-4 px-2 sm:px-4 mx-auto shrink-0 relative z-20 pt-2">
 
-      {/* 1. Pre-Delivery */}
       <MilestoneStrip keys={['rom', 'crown']} />
 
-      {/* 2. Head Out */}
       <Stopwatch />
 
-      {/* 3. Body Out (Hides after birth is fully logged) */}
       {!isBirthFinished && (
         <div className="w-full flex flex-col gap-2 sm:gap-4 mt-2">
           <div className="w-full grid grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-4">
@@ -40,7 +37,6 @@ const MainTimerView = () => {
         </div>
       )}
 
-      {/* 4. Post-Delivery (Stays visible so they can log placenta after APGAR) */}
       <div className="w-full">
          <MilestoneStrip keys={['firstCry', 'placenta']} />
       </div>
@@ -62,34 +58,50 @@ const AppContent = () => {
 
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden z-10 relative">
         
-        {activeTab === 'timer' ? (
+        {activeTab === 'timer' && (
           <div className="flex flex-col min-h-full w-full">
             <div className="flex-1 min-h-[max(env(safe-area-inset-top),1rem)] shrink-0 pointer-events-none"></div>
             <MainTimerView />
             <div className="flex-1 min-h-[calc(110px+env(safe-area-inset-bottom))] shrink-0 pointer-events-none"></div>
           </div>
-        ) : (
+        )}
+        
+        {activeTab === 'history' && (
           <div className="min-h-full w-full pt-[max(env(safe-area-inset-top),2rem)] pb-[calc(110px+env(safe-area-inset-bottom))]">
             <HistoryTab />
           </div>
         )}
 
+        {activeTab === 'settings' && (
+          <div className="min-h-full w-full pt-[max(env(safe-area-inset-top),2rem)] pb-[calc(110px+env(safe-area-inset-bottom))]">
+            <SettingsTab />
+          </div>
+        )}
+
       </div>
 
-      <div className="absolute bottom-0 inset-x-0 h-[80px] bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200/50 dark:border-white/5 p-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] flex justify-center gap-4 z-40">
+      {/* Bottom Navigation */}
+      <div className="absolute bottom-0 inset-x-0 h-[80px] bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200/50 dark:border-white/5 p-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] flex justify-center gap-2 sm:gap-4 z-40">
         <button
           onClick={() => setActiveTab('timer')}
-          className={`flex-1 max-w-[200px] flex flex-col items-center justify-center p-2 rounded-xl font-bold transition-all active:scale-95 touch-manipulation gap-1 ${activeTab === 'timer' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}
+          className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold transition-all active:scale-95 touch-manipulation gap-1 ${activeTab === 'timer' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}
         >
           <Clock size={22} strokeWidth={2.5} />
           <span className="text-[10px] sm:text-xs uppercase tracking-wider">Active</span>
         </button>
         <button
           onClick={() => setActiveTab('history')}
-          className={`flex-1 max-w-[200px] flex flex-col items-center justify-center p-2 rounded-xl font-bold transition-all active:scale-95 touch-manipulation gap-1 ${activeTab === 'history' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}
+          className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold transition-all active:scale-95 touch-manipulation gap-1 ${activeTab === 'history' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}
         >
           <BookCopy size={22} strokeWidth={2.5} />
           <span className="text-[10px] sm:text-xs uppercase tracking-wider">History</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('settings')}
+          className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold transition-all active:scale-95 touch-manipulation gap-1 ${activeTab === 'settings' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}
+        >
+          <SettingsIcon size={22} strokeWidth={2.5} />
+          <span className="text-[10px] sm:text-xs uppercase tracking-wider">Settings</span>
         </button>
       </div>
     </div>
