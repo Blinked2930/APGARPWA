@@ -34,7 +34,6 @@ export function useAudio() {
 
   const playChime = useCallback((useRobotDing = true) => {
     try {
-        // 1. Play the "Robot Ding" ONLY if enabled in settings
         if (useRobotDing && 'speechSynthesis' in window) {
             window.speechSynthesis.cancel(); 
             const utterance = new SpeechSynthesisUtterance('ding');
@@ -46,12 +45,11 @@ export function useAudio() {
             }
 
             utterance.volume = 1;
-            utterance.rate = 0.5; 
-            utterance.pitch = 0.2; 
+            utterance.rate = 0.8; // Sped up slightly from 0.5 so it doesn't drag
+            utterance.pitch = 0.6; // Raised from 0.2 so it sounds like a normal guy, not a demon
             window.speechSynthesis.speak(utterance);
         }
 
-        // 2. Play the "Pretty Ding" 
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         
         if (!audioCtxRef.current) {
