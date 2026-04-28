@@ -5,14 +5,30 @@ export function useAudio() {
 
   const initAudio = useCallback(() => {
     try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        
         if (!audioCtxRef.current) {
-          audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+          audioCtxRef.current = new AudioContext();
         }
-        if (audioCtxRef.current.state === 'suspended') {
-          audioCtxRef.current.resume();
+        
+        const ctx = audioCtxRef.current;
+        if (ctx.state === 'suspended') {
+          ctx.resume();
         }
+
+        // THE FIX: Play a 1-millisecond silent sound.
+        // This tricks iOS Safari into permanently unlocking the Web Audio API 
+        // so it allows our chimes to play during setIntervals later on.
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        gainNode.gain.value = 0; // 100% silent
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        osc.start(0);
+        osc.stop(ctx.currentTime + 0.001);
+
         if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(' ');
+            const utterance = new SpeechSynthesisUtterance('');
             utterance.volume = 0;
             window.speechSynthesis.speak(utterance);
         }
@@ -23,9 +39,12 @@ export function useAudio() {
 
   const playChime = useCallback(() => {
     try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        
         if (!audioCtxRef.current) {
-          audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+          audioCtxRef.current = new AudioContext();
         }
+        
         const ctx = audioCtxRef.current;
         if (ctx.state === 'suspended') ctx.resume();
 
