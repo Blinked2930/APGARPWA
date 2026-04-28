@@ -38,9 +38,17 @@ export function useAudio() {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel(); // Clear any pending speech
             const utterance = new SpeechSynthesisUtterance('ding');
+            
+            // Attempt to find a male/deeper voice if the browser has it loaded
+            const voices = window.speechSynthesis.getVoices();
+            const deepVoice = voices.find(v => v.name.includes('Daniel') || v.name.includes('Alex') || v.name.includes('Male') || v.name.includes('Guy'));
+            if (deepVoice) {
+                utterance.voice = deepVoice;
+            }
+
             utterance.volume = 1;
-            utterance.rate = 0.9; // Slower, more natural speed
-            utterance.pitch = 0.9; // Lower, calmer pitch
+            utterance.rate = 0.5; // Much slower
+            utterance.pitch = 0.2; // Much deeper
             window.speechSynthesis.speak(utterance);
         }
 
