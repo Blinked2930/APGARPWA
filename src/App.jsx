@@ -70,7 +70,7 @@ const AppContent = () => {
   }} />;
 
   if (showBridge) return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8 text-center">
+    <div className="min-h-[100dvh] bg-slate-950 flex flex-col items-center justify-center p-8 text-center">
         <div className="w-20 h-20 bg-indigo-500/20 text-indigo-400 rounded-3xl flex items-center justify-center mb-8 animate-bounce">
             <SettingsIcon size={40} />
         </div>
@@ -88,17 +88,29 @@ const AppContent = () => {
 
   return (
     <div className="h-[100dvh] w-full text-slate-900 dark:text-slate-100 font-sans flex flex-col transition-colors bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
-      <div className="flex-1 w-full overflow-y-auto z-10 relative">
-        {currentTab === 'timer' && <div className="flex flex-col min-h-full py-12"><MainTimerView /></div>}
-        {currentTab === 'history' && <div className="min-h-full py-12"><HistoryTab /></div>}
-        {currentTab === 'settings' && <SettingsTab isWalkthrough={isSettingsTour} onCompleteWalkthrough={() => {
-            localStorage.setItem('settingsTutorialCompleted', 'true');
-            setFlow({ ...flow, settingsDone: true, uiTourStep: 1 });
-            setActiveTab('timer');
-        }} />}
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden z-10 relative">
+        {/* SAFE AREA WRAPPERS RESTORED HERE */}
+        {currentTab === 'timer' && (
+            <div className="flex flex-col min-h-full w-full pt-[max(env(safe-area-inset-top),1rem)] pb-[calc(110px+env(safe-area-inset-bottom))]">
+                <MainTimerView />
+            </div>
+        )}
+        {currentTab === 'history' && (
+            <div className="min-h-full w-full pt-[max(env(safe-area-inset-top),2rem)] pb-[calc(110px+env(safe-area-inset-bottom))]">
+                <HistoryTab />
+            </div>
+        )}
+        {currentTab === 'settings' && (
+            <div className="min-h-full w-full pt-[max(env(safe-area-inset-top),2rem)] pb-[calc(110px+env(safe-area-inset-bottom))]">
+                <SettingsTab isWalkthrough={isSettingsTour} onCompleteWalkthrough={() => {
+                    localStorage.setItem('settingsTutorialCompleted', 'true');
+                    setFlow({ ...flow, settingsDone: true, uiTourStep: 1 });
+                    setActiveTab('timer');
+                }} />
+            </div>
+        )}
       </div>
 
-      {/* NEW: Clean, componentized UI Tour */}
       <UiTour 
         step={flow.uiTourStep} 
         onNext={() => setFlow({...flow, uiTourStep: flow.uiTourStep + 1})} 

@@ -48,7 +48,7 @@ export const SettingsTab = ({ isWalkthrough, onCompleteWalkthrough }) => {
             )}
 
             {tourActive && (
-                <button onClick={nextStep} className="mt-8 w-full py-4 rounded-xl bg-indigo-600 text-white font-black text-lg">
+                <button onClick={nextStep} className="mt-8 w-full py-4 rounded-xl bg-indigo-600 text-white font-black text-lg shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">
                     {tourStep === 3 ? "Finish Setup" : "Next Setting"}
                 </button>
             )}
@@ -56,10 +56,10 @@ export const SettingsTab = ({ isWalkthrough, onCompleteWalkthrough }) => {
     );
 
     return (
-        <div className="w-full max-w-3xl mx-auto p-4 sm:p-8 pb-32">
+        <div className="w-full max-w-3xl mx-auto p-4 sm:p-6 relative">
             {tourStep > 0 && <div className="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm" />}
             
-            <div className="mb-10 flex items-center gap-4 px-4">
+            <div className={`mb-10 flex items-center gap-4 px-2 transition-all duration-500 ${tourStep > 0 ? 'opacity-20 blur-sm relative z-30' : ''}`}>
                 <SettingsIcon className="text-slate-400" size={32} />
                 <h2 className="text-4xl font-black tracking-tight">Settings</h2>
             </div>
@@ -68,7 +68,7 @@ export const SettingsTab = ({ isWalkthrough, onCompleteWalkthrough }) => {
                 <SettingRow 
                     stepRef={step1Ref}
                     icon={Zap} title="Visual Screen Flash" active={visualFlash} onToggle={toggleVisualFlash}
-                    desc="Briefly flashes the entire screen indigo every 30 seconds. Perfect for keeping track of time in your peripheral vision while your hands are busy."
+                    desc="Briefly flashes the entire screen indigo every 30 seconds during the APGAR tracking phase. This creates a visual heartbeat so you can track the passage of time in your peripheral vision while your hands are busy with the baby."
                     tourActive={tourStep === 1}
                 />
                 <SettingRow 
