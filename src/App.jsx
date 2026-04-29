@@ -103,10 +103,8 @@ const AppContent = () => {
   return (
     <div className="h-[100dvh] w-full text-slate-900 dark:text-slate-100 font-sans flex flex-col transition-colors bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
       
-      {/* Added flex & flex-col here so the internal heights calculate correctly */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden z-10 relative flex flex-col">
         
-        {/* Timer Tab: Perfectly centered with safe-area padding */}
         {currentTab === 'timer' && (
             <div className="flex-1 flex flex-col w-full justify-center items-center pb-[100px] pt-[max(env(safe-area-inset-top),2rem)] min-h-min">
                 <MainTimerView />
@@ -136,22 +134,22 @@ const AppContent = () => {
         onFinish={finishUiTour} 
       />
 
-      {/* Navigation Bar: Restored dark mode CSS & locked SVG sizes so they don't collapse into dots */}
-      <div className={`absolute bottom-0 inset-x-0 h-[80px] bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200/50 dark:border-white/5 p-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] flex justify-center gap-2 sm:gap-4 z-40 ${(isSettingsTour || isUiTour) ? 'pointer-events-none' : ''}`}>
+      {/* Navigation Bar: Removed hardcoded height. Set buttons to h-[64px]. Let the container wrap dynamically! */}
+      <div className={`absolute bottom-0 inset-x-0 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200/50 dark:border-white/5 p-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] flex justify-center gap-2 sm:gap-4 z-40 ${(isSettingsTour || isUiTour) ? 'pointer-events-none' : ''}`}>
         
-        <button onClick={() => setActiveTab('timer')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold transition-all active:scale-95 touch-manipulation ${currentTab === 'timer' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}>
-          <Clock className="w-[22px] h-[22px] mb-1 shrink-0" strokeWidth={2.5} />
-          <span className="text-[10px] sm:text-xs uppercase tracking-wider">Active</span>
+        <button onClick={() => setActiveTab('timer')} className={`flex-1 max-w-[150px] h-[64px] flex flex-col items-center justify-center rounded-2xl font-bold gap-1 transition-all active:scale-95 touch-manipulation ${currentTab === 'timer' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}>
+          <Clock className="w-[22px] h-[22px] shrink-0" strokeWidth={2.5} />
+          <span className="text-[10px] sm:text-[11px] uppercase tracking-wider">Active</span>
         </button>
 
-        <button onClick={() => setActiveTab('history')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold transition-all active:scale-95 touch-manipulation ${currentTab === 'history' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}>
-          <BookCopy className="w-[22px] h-[22px] mb-1 shrink-0" strokeWidth={2.5} />
-          <span className="text-[10px] sm:text-xs uppercase tracking-wider">History</span>
+        <button onClick={() => setActiveTab('history')} className={`flex-1 max-w-[150px] h-[64px] flex flex-col items-center justify-center rounded-2xl font-bold gap-1 transition-all active:scale-95 touch-manipulation ${currentTab === 'history' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}>
+          <BookCopy className="w-[22px] h-[22px] shrink-0" strokeWidth={2.5} />
+          <span className="text-[10px] sm:text-[11px] uppercase tracking-wider">History</span>
         </button>
 
-        <button onClick={() => setActiveTab('settings')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold transition-all active:scale-95 touch-manipulation ${currentTab === 'settings' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}>
-          <SettingsIcon className="w-[22px] h-[22px] mb-1 shrink-0" strokeWidth={2.5} />
-          <span className="text-[10px] sm:text-xs uppercase tracking-wider">Settings</span>
+        <button onClick={() => setActiveTab('settings')} className={`flex-1 max-w-[150px] h-[64px] flex flex-col items-center justify-center rounded-2xl font-bold gap-1 transition-all active:scale-95 touch-manipulation ${currentTab === 'settings' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}>
+          <SettingsIcon className="w-[22px] h-[22px] shrink-0" strokeWidth={2.5} />
+          <span className="text-[10px] sm:text-[11px] uppercase tracking-wider">Settings</span>
         </button>
 
       </div>
