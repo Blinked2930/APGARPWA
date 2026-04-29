@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Smartphone, Apple, Share, PlusSquare, MoreVertical, MoreHorizontal, ExternalLink } from 'lucide-react';
+import { Smartphone, Apple, Share, PlusSquare, MoreVertical, MoreHorizontal, ExternalLink, Check } from 'lucide-react';
 
 export const InstallScreen = ({ onBypass }) => {
     const [device, setDevice] = useState(null);
@@ -52,8 +52,8 @@ export const InstallScreen = ({ onBypass }) => {
                                         <span className="leading-snug">Scroll down and tap <b>Add to Home Screen</b>.</span>
                                     </li>
                                     <li className="flex items-start gap-3">
-                                        <ExternalLink size={20} className="text-indigo-500 shrink-0 mt-0.5" /> 
-                                        <span className="leading-snug">Open <b>BirthTimer</b> from your home screen.</span>
+                                        <Check size={20} className="text-indigo-500 shrink-0 mt-0.5" /> 
+                                        <span className="leading-snug">Tap <b>Add</b> in the top right corner.</span>
                                     </li>
                                 </ol>
                             </>
