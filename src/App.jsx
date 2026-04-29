@@ -83,15 +83,18 @@ const AppContent = () => {
     setShowBridge(true);
   }} />;
 
+  // FIXED: No more hardcoded cinematic dark mode! Properly respects light/dark themes.
   if (showBridge) return (
-    <div className="min-h-[100dvh] bg-slate-950 flex flex-col items-center justify-center p-8 text-center">
-        <div className="w-20 h-20 bg-indigo-500/20 text-indigo-400 rounded-3xl flex items-center justify-center mb-8 animate-bounce">
+    <div className="min-h-[100dvh] bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-8 text-center transition-colors">
+        <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-500 dark:text-indigo-400 rounded-3xl flex items-center justify-center mb-8 animate-bounce shadow-inner">
             <SettingsIcon size={40} />
         </div>
-        <h1 className="text-4xl font-black text-white mb-4">Almost Ready</h1>
-        <p className="text-slate-400 text-lg mb-10 max-w-xs">Now let's quickly customize your BirthTimer settings to fit your workflow.</p>
-        <button onClick={() => setShowBridge(false)} className="w-full max-w-xs py-5 rounded-2xl bg-indigo-600 text-white font-black text-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-indigo-500/20">
-            Setup Settings <ChevronRight />
+        <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">Almost Ready</h1>
+        <p className="text-slate-500 dark:text-slate-400 font-medium text-lg mb-10 max-w-xs leading-relaxed">
+            Now let's quickly customize your BirthTimer settings to fit your workflow.
+        </p>
+        <button onClick={() => setShowBridge(false)} className="w-full max-w-xs py-5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-indigo-500/20">
+            Setup Settings <ChevronRight strokeWidth={3} />
         </button>
     </div>
   );
@@ -134,7 +137,6 @@ const AppContent = () => {
         onFinish={finishUiTour} 
       />
 
-      {/* Navigation Bar: Removed hardcoded height. Set buttons to h-[64px]. Let the container wrap dynamically! */}
       <div className={`absolute bottom-0 inset-x-0 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200/50 dark:border-white/5 p-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] flex justify-center gap-2 sm:gap-4 z-40 ${(isSettingsTour || isUiTour) ? 'pointer-events-none' : ''}`}>
         
         <button onClick={() => setActiveTab('timer')} className={`flex-1 max-w-[150px] h-[64px] flex flex-col items-center justify-center rounded-2xl font-bold gap-1 transition-all active:scale-95 touch-manipulation ${currentTab === 'timer' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}>
