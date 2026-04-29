@@ -57,7 +57,9 @@ export const SettingsTab = ({ isWalkthrough, onCompleteWalkthrough }) => {
 
     return (
         <div className="w-full max-w-3xl mx-auto p-4 sm:p-6 relative">
-            {tourStep > 0 && <div className="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm" />}
+            
+            {/* FIXED: Using bg-slate-900/60 to perfectly match the UiTour component! */}
+            {tourStep > 0 && <div className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300" />}
             
             <div className={`mb-10 flex items-center gap-4 px-2 transition-all duration-500 ${tourStep > 0 ? 'opacity-20 blur-sm relative z-30' : ''}`}>
                 <SettingsIcon className="text-slate-400" size={32} />
