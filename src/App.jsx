@@ -89,10 +89,13 @@ const AppContent = () => {
   return (
     <div className="h-[100dvh] w-full text-slate-900 dark:text-slate-100 font-sans flex flex-col transition-colors bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden z-10 relative">
-        {/* SAFE AREA WRAPPERS RESTORED HERE */}
+        
+        {/* Restored the flex-1 vertical centering springs! */}
         {currentTab === 'timer' && (
-            <div className="flex flex-col min-h-full w-full pt-[max(env(safe-area-inset-top),1rem)] pb-[calc(110px+env(safe-area-inset-bottom))]">
+            <div className="flex flex-col min-h-full w-full">
+                <div className="flex-1 min-h-[max(env(safe-area-inset-top),2rem)] shrink-0 pointer-events-none"></div>
                 <MainTimerView />
+                <div className="flex-1 min-h-[calc(110px+env(safe-area-inset-bottom))] shrink-0 pointer-events-none"></div>
             </div>
         )}
         {currentTab === 'history' && (
@@ -117,17 +120,17 @@ const AppContent = () => {
         onFinish={finishUiTour} 
       />
 
-      {/* Bottom Navigation */}
-      <div className={`absolute bottom-0 inset-x-0 h-[80px] bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200/50 p-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] flex justify-center gap-2 z-40 ${(isSettingsTour || isUiTour) ? 'pointer-events-none' : ''}`}>
-        <button onClick={() => setActiveTab('timer')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold gap-1 transition-all active:scale-95 touch-manipulation ${currentTab === 'timer' ? 'text-indigo-600 bg-indigo-50 border border-indigo-100' : 'text-slate-400'}`}>
+      {/* Restored the dark mode CSS for the navigation bar! */}
+      <div className={`absolute bottom-0 inset-x-0 h-[80px] bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200/50 dark:border-white/5 p-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] flex justify-center gap-2 z-40 ${(isSettingsTour || isUiTour) ? 'pointer-events-none' : ''}`}>
+        <button onClick={() => setActiveTab('timer')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold gap-1 transition-all active:scale-95 touch-manipulation ${currentTab === 'timer' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}>
           <Clock size={22} strokeWidth={2.5} />
           <span className="text-[10px] uppercase tracking-wider">Active</span>
         </button>
-        <button onClick={() => setActiveTab('history')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold gap-1 transition-all active:scale-95 touch-manipulation ${currentTab === 'history' ? 'text-indigo-600 bg-indigo-50 border border-indigo-100' : 'text-slate-400'}`}>
+        <button onClick={() => setActiveTab('history')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold gap-1 transition-all active:scale-95 touch-manipulation ${currentTab === 'history' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}>
           <BookCopy size={22} strokeWidth={2.5} />
           <span className="text-[10px] uppercase tracking-wider">History</span>
         </button>
-        <button onClick={() => setActiveTab('settings')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold gap-1 transition-all active:scale-95 touch-manipulation ${currentTab === 'settings' ? 'text-indigo-600 bg-indigo-50 border border-indigo-100' : 'text-slate-400'}`}>
+        <button onClick={() => setActiveTab('settings')} className={`flex-1 max-w-[150px] flex flex-col items-center justify-center p-2 rounded-xl font-bold gap-1 transition-all active:scale-95 touch-manipulation ${currentTab === 'settings' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm border border-indigo-100 dark:border-indigo-500/20' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent'}`}>
           <SettingsIcon size={22} strokeWidth={2.5} />
           <span className="text-[10px] uppercase tracking-wider">Settings</span>
         </button>
