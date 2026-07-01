@@ -12,6 +12,7 @@ import { SettingsTab } from './components/SettingsTab';
 import { InstallScreen } from './components/InstallScreen';
 import { TutorialScreen } from './components/TutorialScreen';
 import { UiTour } from './components/UiTour';
+import { PaywallScreen } from './components/PaywallScreen'; // NEW IMPORT
 import { Clock, BookCopy, Settings as SettingsIcon, ChevronRight } from 'lucide-react';
 
 const MainTimerView = () => {
@@ -54,6 +55,9 @@ const AppContent = () => {
   const [activeTab, setActiveTab] = useState('timer');
   const [flow, setFlow] = useState({ isStandalone: true, tutorialDone: true, settingsDone: true, uiTourStep: 0 });
   const [showBridge, setShowBridge] = useState(false);
+  
+  // NEW: Feature Flag State
+  const [showPaywallTest, setShowPaywallTest] = useState(import.meta.env.VITE_TEST_PAYWALL === 'true');
 
   useEffect(() => {
     const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
@@ -75,6 +79,11 @@ const AppContent = () => {
     setActiveTab('timer');
   };
 
+  // NEW: Intercept the app with the Paywall if the feature flag is active
+  if (showPaywallTest) {
+      return <PaywallScreen onBypass={() => setShowPaywallTest(false)} />;
+  }
+
   if (!flow.isStandalone) return <InstallScreen onBypass={() => setFlow({ ...flow, isStandalone: true })} />;
   
   if (!flow.tutorialDone) return <TutorialScreen onComplete={() => {
@@ -83,7 +92,6 @@ const AppContent = () => {
     setShowBridge(true);
   }} />;
 
-  // FIXED: No more hardcoded cinematic dark mode! Properly respects light/dark themes.
   if (showBridge) return (
     <div className="min-h-[100dvh] bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-8 text-center transition-colors">
         <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-500 dark:text-indigo-400 rounded-3xl flex items-center justify-center mb-8 animate-bounce shadow-inner">
