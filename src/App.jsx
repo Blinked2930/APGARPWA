@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ClerkProvider } from '@clerk/clerk-react';
 import { AppProvider, useAppContext } from './context/AppProvider';
 import { Stopwatch } from './components/Stopwatch';
 import { MilestoneStrip } from './components/MilestoneStrip';
@@ -12,7 +13,7 @@ import { SettingsTab } from './components/SettingsTab';
 import { InstallScreen } from './components/InstallScreen';
 import { TutorialScreen } from './components/TutorialScreen';
 import { UiTour } from './components/UiTour';
-import { PaywallScreen } from './components/PaywallScreen'; // NEW IMPORT
+import { PaywallScreen } from './components/PaywallScreen';
 import { Clock, BookCopy, Settings as SettingsIcon, ChevronRight } from 'lucide-react';
 
 const MainTimerView = () => {
@@ -56,7 +57,7 @@ const AppContent = () => {
   const [flow, setFlow] = useState({ isStandalone: true, tutorialDone: true, settingsDone: true, uiTourStep: 0 });
   const [showBridge, setShowBridge] = useState(false);
   
-  // NEW: Feature Flag State
+  // Feature Flag State
   const [showPaywallTest, setShowPaywallTest] = useState(import.meta.env.VITE_TEST_PAYWALL === 'true');
 
   useEffect(() => {
@@ -79,7 +80,7 @@ const AppContent = () => {
     setActiveTab('timer');
   };
 
-  // NEW: Intercept the app with the Paywall if the feature flag is active
+  // Intercept the app with the Paywall if the feature flag is active
   if (showPaywallTest) {
       return <PaywallScreen onBypass={() => setShowPaywallTest(false)} />;
   }
@@ -167,4 +168,40 @@ const AppContent = () => {
   );
 };
 
-export default function App() { return (<AppProvider><AppContent /></AppProvider>); }
+// ==========================================
+// NEW: Safe Clerk Initialization
+// ==========================================
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const isPaywallTesting = import.meta.env.VITE_TEST_PAYWALL === 'true';
+
+export default function App() { 
+  // 1. If testing is ON, but the key is missing, throw an explicit error screen
+  if (isPaywallTesting && !PUBLISHABLE_KEY) {
+    return (
+        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
+            <div className="bg-red-500/10 p-6 rounded-2xl border border-red-500/20 max-w-md">
+                <h2 className="text-xl font-black text-red-500 mb-2">Missing Clerk Key</h2>
+                <p className="text-slate-400 text-sm">Your .env.local file has the paywall enabled, but is missing the VITE_CLERK_PUBLISHABLE_KEY.</p>
+            </div>
+        </div>
+    );
+  }
+
+  // 2. If testing is OFF, completely bypass Clerk so the app doesn't crash!
+  if (!isPaywallTesting) {
+      return (
+          <AppProvider>
+            <AppContent />
+          </AppProvider>
+      );
+  }
+
+  // 3. If testing is ON and we have a key, wrap the app in Clerk!
+  return (
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
+    </ClerkProvider>
+  ); 
+}
